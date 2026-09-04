@@ -28,7 +28,7 @@ export function EventBrowser({ events }: { events: EventSummary[] }) {
           <span className="text-sm font-medium uppercase tracking-wide text-emerald-700">
             Happening soon
           </span>
-          <h2 className="mt-1 font-display text-2xl font-bold text-zinc-900 sm:text-3xl">
+          <h2 className="mt-1 font-display text-2xl font-bold text-zinc-900 dark:text-zinc-100 sm:text-3xl">
             Find your next event
           </h2>
         </div>
@@ -36,20 +36,20 @@ export function EventBrowser({ events }: { events: EventSummary[] }) {
         <label className="relative w-full sm:w-72">
           <Search
             size={16}
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500"
           />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by event, venue, or city"
-            className="w-full rounded-full border border-zinc-200 bg-white py-2.5 pl-9 pr-4 text-sm text-zinc-900 outline-none transition-colors focus:border-emerald-500"
+            className="w-full rounded-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 py-2.5 pl-9 pr-4 text-sm text-zinc-900 dark:text-zinc-100 outline-none transition-colors focus:border-emerald-500"
           />
         </label>
       </div>
 
       {results.length === 0 ? (
-        <p className="mt-12 text-center text-sm text-zinc-500">
+        <p className="mt-12 text-center text-sm text-zinc-500 dark:text-zinc-400">
           {events.length === 0
             ? "No events on sale right now — check back soon."
             : `No events match “${query}” yet.`}

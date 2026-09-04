@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Annotation } from "@artcollect/ui";
+import { PartnersMarquee } from "@/components/sections/PartnersMarquee";
 import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
 import { Coverflow, type CoverflowItem } from "@/components/carousel/Coverflow";
 import { listPublishedPosts } from "@/lib/posts";

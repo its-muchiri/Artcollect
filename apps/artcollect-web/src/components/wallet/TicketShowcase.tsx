@@ -59,7 +59,7 @@ export function TicketShowcase(props: TactileTicketProps) {
   return (
     <div
       ref={regionRef}
-      className="relative overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-900"
+      className="relative overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-900"
     >
       {/* Static poster fallback — the 3D face's exact design, in CSS. */}
       <div
@@ -88,7 +88,7 @@ export function TicketShowcase(props: TactileTicketProps) {
       {objectOn && !reduced && (
         <div className="absolute inset-0">
           <TactileTicket {...props} />
-          <p className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-white/85 px-3 py-1 text-xs font-medium text-zinc-600">
+          <p className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-white/85 dark:bg-zinc-900/85 px-3 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">
             Drag the ticket to tilt it
           </p>
         </div>

@@ -109,7 +109,7 @@ export default async function EventPage({
       <Header />
 
       <main className="mx-auto w-full max-w-6xl px-6 py-10">
-        <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-100">
+        <div className="overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-100">
           {event.coverImage && (
             // eslint-disable-next-line @next/next/no-img-element -- external, unoptimized editorial imagery
             <img
@@ -146,21 +146,21 @@ export default async function EventPage({
                 />
               </>
             ) : (
-              <h1 className="mt-3 font-display text-3xl font-bold text-zinc-900 sm:text-4xl">
+              <h1 className="mt-3 font-display text-3xl font-bold text-zinc-900 dark:text-zinc-100 sm:text-4xl">
                 {event.title}
               </h1>
             )}
             <div className="mt-2 flex flex-wrap items-center gap-3">
-              <p className="text-zinc-500">by {event.organiser}</p>
+              <p className="text-zinc-500 dark:text-zinc-400">by {event.organiser}</p>
               <ShareLinkButton
                 code={shareCode}
                 title={`${event.title} — tickets on TikoYetu`}
                 label="Share event"
-                className="inline-flex items-center gap-2 rounded-full border border-zinc-300 px-3.5 py-1.5 text-xs font-semibold text-zinc-600 transition-colors hover:border-zinc-900 hover:text-zinc-900"
+                className="inline-flex items-center gap-2 rounded-full border border-zinc-300 px-3.5 py-1.5 text-xs font-semibold text-zinc-600 dark:text-zinc-400 transition-colors hover:border-zinc-900 hover:text-zinc-900"
               />
             </div>
 
-            <div className="mt-6 flex flex-col gap-3 text-sm text-zinc-600 sm:flex-row sm:gap-8">
+            <div className="mt-6 flex flex-col gap-3 text-sm text-zinc-600 dark:text-zinc-400 sm:flex-row sm:gap-8">
               <span className="flex items-center gap-2">
                 <Calendar size={16} className="text-emerald-600" />
                 {event.startsAt ? formatEventDate(event.startsAt) : "Date to be announced"}
@@ -172,7 +172,7 @@ export default async function EventPage({
               </span>
             </div>
 
-            {event.description && <p className="mt-6 max-w-2xl text-zinc-600">{event.description}</p>}
+            {event.description && <p className="mt-6 max-w-2xl text-zinc-600 dark:text-zinc-400">{event.description}</p>}
           </div>
 
           <div className="lg:sticky lg:top-24 lg:self-start">

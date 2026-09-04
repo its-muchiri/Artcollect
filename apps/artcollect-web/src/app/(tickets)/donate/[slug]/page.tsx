@@ -48,7 +48,7 @@ export default async function CausePage({
 
         <div className="mt-6 grid grid-cols-1 gap-10 lg:grid-cols-[1fr_380px]">
           <div>
-            <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-100">
+            <div className="overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-100">
               {cause.coverImage && (
                 // eslint-disable-next-line @next/next/no-img-element -- external, unoptimized editorial imagery
                 <img
@@ -59,7 +59,7 @@ export default async function CausePage({
               )}
             </div>
 
-            <p className="mt-6 flex flex-wrap items-center gap-3 text-sm text-zinc-500">
+            <p className="mt-6 flex flex-wrap items-center gap-3 text-sm text-zinc-500 dark:text-zinc-400">
               <span className="flex items-center gap-1.5">
                 <MapPin size={15} aria-hidden className="text-emerald-600" />
                 {cause.country ?? "East Africa"}
@@ -68,10 +68,10 @@ export default async function CausePage({
               <span>Run by {cause.organiserName}</span>
             </p>
 
-            <h1 className="mt-2 font-display text-3xl font-bold text-zinc-900 sm:text-4xl">
+            <h1 className="mt-2 font-display text-3xl font-bold text-zinc-900 dark:text-zinc-100 sm:text-4xl">
               {cause.title}
             </h1>
-            <p className="mt-3 max-w-2xl text-lg text-zinc-600">{cause.summary}</p>
+            <p className="mt-3 max-w-2xl text-lg text-zinc-600 dark:text-zinc-400">{cause.summary}</p>
 
             <div className="mt-8 space-y-4">
               {cause.story.split("\n\n").map((block, i) => {
@@ -79,7 +79,7 @@ export default async function CausePage({
                   return (
                     <h2
                       key={i}
-                      className="pt-2 font-display text-xl font-bold text-zinc-900"
+                      className="pt-2 font-display text-xl font-bold text-zinc-900 dark:text-zinc-100"
                     >
                       {block.slice(3)}
                     </h2>
@@ -87,7 +87,7 @@ export default async function CausePage({
                 }
                 if (block.startsWith("- ")) {
                   return (
-                    <ul key={i} className="list-disc space-y-1 pl-5 text-sm text-zinc-600">
+                    <ul key={i} className="list-disc space-y-1 pl-5 text-sm text-zinc-600 dark:text-zinc-400">
                       {block.split("\n").map((item, j) => (
                         <li key={j}>{item.slice(2)}</li>
                       ))}
@@ -95,7 +95,7 @@ export default async function CausePage({
                   );
                 }
                 return (
-                  <p key={i} className="max-w-2xl leading-relaxed text-zinc-600">
+                  <p key={i} className="max-w-2xl leading-relaxed text-zinc-600 dark:text-zinc-400">
                     {block}
                   </p>
                 );
@@ -103,18 +103,18 @@ export default async function CausePage({
             </div>
 
             {cause.supporters.length > 0 && (
-              <section className="mt-12 border-t border-zinc-200 pt-8">
-                <h2 className="font-display text-xl font-bold text-zinc-900">
+              <section className="mt-12 border-t border-zinc-200 dark:border-zinc-800 pt-8">
+                <h2 className="font-display text-xl font-bold text-zinc-900 dark:text-zinc-100">
                   Recent supporters
                 </h2>
                 <ul className="mt-4 space-y-3">
                   {cause.supporters.map((supporter, i) => (
                     <li
                       key={`${supporter.displayName}-${i}`}
-                      className="rounded-2xl border border-zinc-200 bg-white p-4"
+                      className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4"
                     >
                       <div className="flex items-baseline justify-between gap-3">
-                        <span className="text-sm font-semibold text-zinc-900">
+                        <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
                           {supporter.displayName}
                         </span>
                         <span className="text-sm font-semibold text-emerald-700">
@@ -122,9 +122,9 @@ export default async function CausePage({
                         </span>
                       </div>
                       {supporter.message && (
-                        <p className="mt-1 text-sm text-zinc-500">“{supporter.message}”</p>
+                        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">“{supporter.message}”</p>
                       )}
-                      <p className="mt-1 text-xs text-zinc-400">
+                      <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
                         {formatEventDate(supporter.createdAt)}
                       </p>
                     </li>
@@ -135,12 +135,12 @@ export default async function CausePage({
           </div>
 
           <div className="lg:sticky lg:top-24 lg:self-start">
-            <div className="rounded-2xl border border-zinc-200 bg-white p-6">
+            <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6">
               <div className="flex items-baseline justify-between text-sm">
-                <span className="font-display text-2xl font-bold text-zinc-900">
+                <span className="font-display text-2xl font-bold text-zinc-900 dark:text-zinc-100">
                   {formatKes(cause.raisedMinor, cause.currency)}
                 </span>
-                <span className="text-zinc-500">
+                <span className="text-zinc-500 dark:text-zinc-400">
                   of {formatKes(cause.goalMinor, cause.currency)}
                 </span>
               </div>
@@ -155,7 +155,7 @@ export default async function CausePage({
                   aria-label={`${cause.title} funding progress`}
                 />
               </div>
-              <p className="mt-2 text-xs text-zinc-500">
+              <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
                 {cause.progressPercent}% funded · {cause.donorCount}{" "}
                 {cause.donorCount === 1 ? "supporter" : "supporters"}
               </p>

@@ -57,7 +57,7 @@ export default async function DonationPendingPage({
           <>
             <div className="flex items-center gap-3 text-emerald-700">
               <CheckCircle2 />
-              <h1 className="font-display text-2xl font-bold text-zinc-900">
+              <h1 className="font-display text-2xl font-bold text-zinc-900 dark:text-zinc-100">
                 Thank you — gift received
               </h1>
             </div>
@@ -70,15 +70,15 @@ export default async function DonationPendingPage({
               </Annotation>
             </div>
 
-            <div className="mt-6 rounded-2xl border border-zinc-200 bg-white p-6">
-              <p className="text-sm text-zinc-500">Your gift</p>
-              <p className="mt-1 font-display text-2xl font-bold text-zinc-900">
+            <div className="mt-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6">
+              <p className="text-sm text-zinc-500 dark:text-zinc-400">Your gift</p>
+              <p className="mt-1 font-display text-2xl font-bold text-zinc-900 dark:text-zinc-100">
                 {formatKes(Number(donation.amountMinor), donation.currency)}
               </p>
-              <p className="mt-1 text-sm text-zinc-500">
+              <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
                 to <Link href={`/donate/${donation.cause.slug}`} className="text-emerald-700 hover:underline">{donation.cause.title}</Link>
               </p>
-              <p className="mt-3 text-xs text-zinc-400">
+              <p className="mt-3 text-xs text-zinc-400 dark:text-zinc-500">
                 A receipt is on its way to {donation.donorEmail}.
               </p>
             </div>
@@ -93,14 +93,14 @@ export default async function DonationPendingPage({
         ) : finalStatus === "failed" ? (
           <div className="flex items-center gap-3 text-red-600">
             <XCircle />
-            <h1 className="font-display text-2xl font-bold text-zinc-900">
+            <h1 className="font-display text-2xl font-bold text-zinc-900 dark:text-zinc-100">
               Payment didn&apos;t go through
             </h1>
           </div>
         ) : (
           <div className="flex items-center gap-3 text-amber-600">
             <Clock />
-            <h1 className="font-display text-2xl font-bold text-zinc-900">
+            <h1 className="font-display text-2xl font-bold text-zinc-900 dark:text-zinc-100">
               Confirming your donation…
             </h1>
           </div>

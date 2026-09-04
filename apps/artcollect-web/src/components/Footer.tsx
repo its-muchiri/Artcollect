@@ -30,22 +30,22 @@ const COLUMNS = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-zinc-200 bg-white">
+    <footer className="border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
       <div className="mx-auto grid w-full max-w-6xl grid-cols-2 gap-8 px-6 py-16 sm:grid-cols-4">
         <div className="col-span-2 sm:col-span-1">
-          <span className="font-display text-lg font-bold text-zinc-900">TikoYetu</span>
-          <p className="mt-2 text-sm text-zinc-500">
+          <span className="font-display text-lg font-bold text-zinc-900 dark:text-zinc-100">TikoYetu</span>
+          <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
             Fast, secure ticketing for Kenyan events.
           </p>
         </div>
 
         {COLUMNS.map((col) => (
           <div key={col.title}>
-            <h3 className="text-sm font-semibold text-zinc-900">{col.title}</h3>
+            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{col.title}</h3>
             <ul className="mt-3 space-y-2">
               {col.links.map((link) => (
                 <li key={link.label}>
-                  <Link href={link.href} className="text-sm text-zinc-500 hover:text-zinc-900">
+                  <Link href={link.href} className="text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900">
                     {link.label}
                   </Link>
                 </li>
@@ -55,7 +55,7 @@ export function Footer() {
         ))}
       </div>
 
-      <div className="border-t border-zinc-200 py-6 text-center text-xs text-zinc-400">
+      <div className="border-t border-zinc-200 dark:border-zinc-800 py-6 text-center text-xs text-zinc-400 dark:text-zinc-500">
         © {new Date().getFullYear()} TikoYetu. Part of the ArtCollect ecosystem.
       </div>
     </footer>

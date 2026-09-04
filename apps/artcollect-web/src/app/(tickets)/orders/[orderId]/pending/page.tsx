@@ -48,9 +48,9 @@ export default async function OrderPendingPage({
           <>
             <div className="flex items-center gap-3 text-emerald-700">
               <CheckCircle2 />
-              <h1 className="font-display text-2xl font-bold text-zinc-900">Payment confirmed</h1>
+              <h1 className="font-display text-2xl font-bold text-zinc-900 dark:text-zinc-100">Payment confirmed</h1>
             </div>
-            <p className="mt-2 text-zinc-500">Order {order.id}</p>
+            <p className="mt-2 text-zinc-500 dark:text-zinc-400">Order {order.id}</p>
 
             {/* The ONE decorative touch the calm checkout gets (docs/11
                 Phase 5): a single handwritten confirmation line, on its
@@ -81,9 +81,9 @@ export default async function OrderPendingPage({
           <>
             <div className="flex items-center gap-3 text-red-600">
               <XCircle />
-              <h1 className="font-display text-2xl font-bold text-zinc-900">Payment failed</h1>
+              <h1 className="font-display text-2xl font-bold text-zinc-900 dark:text-zinc-100">Payment failed</h1>
             </div>
-            <p className="mt-2 text-zinc-500">
+            <p className="mt-2 text-zinc-500 dark:text-zinc-400">
               The M-Pesa prompt wasn&apos;t completed — cancelled, timed out, or declined. No charge was
               made.
             </p>
@@ -92,9 +92,9 @@ export default async function OrderPendingPage({
           <>
             <div className="flex items-center gap-3 text-amber-600">
               <Clock />
-              <h1 className="font-display text-2xl font-bold text-zinc-900">Check your phone</h1>
+              <h1 className="font-display text-2xl font-bold text-zinc-900 dark:text-zinc-100">Check your phone</h1>
             </div>
-            <p className="mt-3 flex items-start gap-2 text-zinc-600">
+            <p className="mt-3 flex items-start gap-2 text-zinc-600 dark:text-zinc-400">
               <Smartphone size={18} className="mt-0.5 shrink-0 text-emerald-600" />
               An M-Pesa prompt was sent to {order.buyerPhone ?? "your phone"}. Enter your PIN to
               complete payment — this page updates on its own once it&apos;s confirmed.

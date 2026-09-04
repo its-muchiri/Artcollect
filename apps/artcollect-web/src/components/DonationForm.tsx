@@ -58,13 +58,13 @@ export function DonationForm({ causeId, causeTitle, currency, action }: Donation
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-2xl border border-zinc-200 bg-white p-6">
-      <h2 className="font-display text-lg font-semibold text-zinc-900">
+    <form onSubmit={handleSubmit} className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6">
+      <h2 className="font-display text-lg font-semibold text-zinc-900 dark:text-zinc-100">
         Support “{causeTitle}”
       </h2>
 
       <fieldset className="mt-4">
-        <legend className="text-sm font-medium text-zinc-700">Choose an amount</legend>
+        <legend className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Choose an amount</legend>
         <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {PRESETS_MINOR.map((preset) => {
             const selected = customValue.trim() === "" && amountMinor === preset;
@@ -80,7 +80,7 @@ export function DonationForm({ causeId, causeTitle, currency, action }: Donation
                 className={`rounded-full border px-3 py-2 text-sm font-semibold transition-colors ${
                   selected
                     ? "border-emerald-600 bg-emerald-50 text-emerald-700"
-                    : "border-zinc-200 text-zinc-600 hover:bg-zinc-50"
+                    : "border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800"
                 }`}
               >
                 {formatKes(preset, currency)}
@@ -88,7 +88,7 @@ export function DonationForm({ causeId, causeTitle, currency, action }: Donation
             );
           })}
         </div>
-        <label htmlFor="custom-amount" className="mt-3 block text-sm font-medium text-zinc-700">
+        <label htmlFor="custom-amount" className="mt-3 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
           Other amount ({currency})
         </label>
         <input
@@ -100,14 +100,14 @@ export function DonationForm({ causeId, causeTitle, currency, action }: Donation
           placeholder="e.g. 250"
           value={customValue}
           onChange={(e) => setCustomValue(e.target.value)}
-          className="mt-1 w-full rounded-lg border border-zinc-200 px-3 py-2.5 text-sm text-zinc-900 outline-none focus:border-emerald-500"
+          className="mt-1 w-full rounded-lg border border-zinc-200 dark:border-zinc-800 px-3 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 outline-none focus:border-emerald-500"
         />
       </fieldset>
 
       <div className="mt-4 space-y-3">
         <div>
-          <label htmlFor="donor-email" className="text-sm font-medium text-zinc-700">
-            Email <span className="text-zinc-400">(for your receipt)</span>
+          <label htmlFor="donor-email" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            Email <span className="text-zinc-400 dark:text-zinc-500">(for your receipt)</span>
           </label>
           <input
             id="donor-email"
@@ -116,23 +116,23 @@ export function DonationForm({ causeId, causeTitle, currency, action }: Donation
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            className="mt-1 w-full rounded-lg border border-zinc-200 px-3 py-2.5 text-sm text-zinc-900 outline-none focus:border-emerald-500"
+            className="mt-1 w-full rounded-lg border border-zinc-200 dark:border-zinc-800 px-3 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 outline-none focus:border-emerald-500"
           />
         </div>
         <div>
-          <label htmlFor="donor-name" className="text-sm font-medium text-zinc-700">
-            Name <span className="text-zinc-400">(optional — shown with your gift)</span>
+          <label htmlFor="donor-name" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            Name <span className="text-zinc-400 dark:text-zinc-500">(optional — shown with your gift)</span>
           </label>
           <input
             id="donor-name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-zinc-200 px-3 py-2.5 text-sm text-zinc-900 outline-none focus:border-emerald-500"
+            className="mt-1 w-full rounded-lg border border-zinc-200 dark:border-zinc-800 px-3 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 outline-none focus:border-emerald-500"
           />
         </div>
         <div>
-          <label htmlFor="donor-message" className="text-sm font-medium text-zinc-700">
-            Words of support <span className="text-zinc-400">(optional, public)</span>
+          <label htmlFor="donor-message" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            Words of support <span className="text-zinc-400 dark:text-zinc-500">(optional, public)</span>
           </label>
           <textarea
             id="donor-message"
@@ -140,10 +140,10 @@ export function DonationForm({ causeId, causeTitle, currency, action }: Donation
             maxLength={280}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-zinc-200 px-3 py-2.5 text-sm text-zinc-900 outline-none focus:border-emerald-500"
+            className="mt-1 w-full rounded-lg border border-zinc-200 dark:border-zinc-800 px-3 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 outline-none focus:border-emerald-500"
           />
         </div>
-        <label className="flex items-center gap-2 text-sm text-zinc-600">
+        <label className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
           <input
             type="checkbox"
             checked={anonymous}
@@ -159,13 +159,13 @@ export function DonationForm({ causeId, causeTitle, currency, action }: Donation
       <button
         type="submit"
         disabled={effectiveAmountMinor < CUSTOM_MIN || !email || isPending}
-        className="mt-4 w-full rounded-full bg-emerald-600 py-3 text-sm font-semibold text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-400"
+        className="mt-4 w-full rounded-full bg-emerald-600 py-3 text-sm font-semibold text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-400 dark:text-zinc-500 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-600 dark:text-zinc-400"
       >
         {isPending
           ? "Redirecting to payment…"
           : `Donate ${formatKes(effectiveAmountMinor, currency)} securely`}
       </button>
-      <p className="mt-2 text-center text-xs text-zinc-400">
+      <p className="mt-2 text-center text-xs text-zinc-400 dark:text-zinc-500">
         Payment is verified server-side before your gift is marked received.
       </p>
     </form>

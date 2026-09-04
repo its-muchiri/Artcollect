@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { signUpAction, type SignUpState } from "@/lib/actions/auth-actions";
 
 const initialState: SignUpState = {};
@@ -10,7 +11,8 @@ export default function SignUpPage() {
   const [state, formAction, pending] = useActionState(signUpAction, initialState);
 
   return (
-    <main className="relative z-10 mx-auto flex min-h-screen max-w-sm flex-col justify-center px-6">
+    <main className="relative z-10 mx-auto flex min-h-screen max-w-sm flex-col justify-center bg-[#17130f] px-6">
+      <Image src="/brand/monogram.png" alt="artcollect.co.ke" width={40} height={44} className="mb-6 h-10 w-auto" priority />
       <h1 className="font-serif text-3xl font-semibold text-zinc-50">Create an account</h1>
       <p className="mt-2 text-sm text-zinc-400">
         Save favourites, track enquiries, and manage your listings.

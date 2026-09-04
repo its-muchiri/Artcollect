@@ -79,6 +79,8 @@ export default async function Home() {
     })),
   });
 
+  const spotlightArtist = artists.find((artist) => artist.slug === "ben-mungai") ?? artists[0];
+
   return (
     <>
       <FloatingNavbar />
@@ -90,7 +92,7 @@ export default async function Home() {
 
         <ShowcaseCarousel items={showcaseItems} />
 
-        {artists[0] && <ArtistSpotlight artist={artists[0]} />}
+        {spotlightArtist && <ArtistSpotlight artist={spotlightArtist} />}
 
         <JournalBand posts={posts} />
 

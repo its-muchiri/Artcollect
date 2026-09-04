@@ -61,7 +61,9 @@ html.lenis body {
 }
 
 html {
-  color-scheme: light;
+  /* Follow the OS: form controls, scrollbars, and the UA canvas all flip
+     with the system setting, same as the token flip below in tokens.css. */
+  color-scheme: light dark;
 }
 
 body {

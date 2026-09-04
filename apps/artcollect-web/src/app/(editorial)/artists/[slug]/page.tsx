@@ -4,10 +4,12 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Annotation, HighlighterMark, StapleMark, TapePiece } from "@artcollect/ui";
 import { ArtworkTile } from "@/components/art/ArtworkTile";
+import { ShareLinkButton } from "@/components/ShareLinkButton";
 import { HorizontalGallery } from "@/components/sections/HorizontalGallery";
 import { FloatingNavbar } from "@/components/ui/FloatingNavbar";
 import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
 import { getArtistBySlug, profileQuote } from "@/lib/artists";
+import { ensureShortLink } from "@/lib/short-links";
 import { cn } from "@/lib/utils";
 
 // Profiles and availability change; render per-request.
@@ -44,6 +46,7 @@ export default async function ArtistPage({
   const { slug } = await params;
   const artist = await getArtistBySlug(slug);
   if (!artist) notFound();
+  const shareCode = await ensureShortLink(`/artists/${artist.slug}`);
 
   const quote = profileQuote(artist.tagline, artist.bio);
   const notes: { text: string; className: string; tone: "marker" | "ink" | "lime" | "pink" | "highlight" }[] = [
@@ -98,7 +101,7 @@ export default async function ArtistPage({
           <div className="mt-8 grid grid-cols-1 items-start gap-12 lg:grid-cols-[2fr_3fr]">
             {/* Portrait with tape + staple + margin notes */}
             <div className="relative mx-auto w-full max-w-sm lg:mx-0">
-              <div className="relative border-2 border-ink bg-paper-deep shadow-[6px_6px_0_rgba(22,19,17,1)]" style={{ rotate: "-1.5deg" }}>
+              <div className="relative border-2 border-ink bg-paper-deep shadow-[6px_6px_0_var(--ac-shadow-ink)]" style={{ rotate: "-1.5deg" }}>
                 {/* eslint-disable-next-line @next/next/no-img-element -- external, unoptimized editorial imagery */}
                 <img
                   src={artist.portraitUrl}
@@ -180,6 +183,7 @@ export default async function ArtistPage({
                     Artist&apos;s site
                   </a>
                 )}
+                <ShareLinkButton code={shareCode} title={`${artist.name} — on ArtCollect`} label="Share profile" />
               </div>
             </div>
           </div>
@@ -201,7 +205,7 @@ export default async function ArtistPage({
                 .filter((d) => d.description)
                 .map((d, i) => (
                   <RevealOnScroll key={d.name} index={i}>
-                    <div className="h-full border-2 border-ink bg-paper p-6 shadow-[4px_4px_0_rgba(22,19,17,1)]">
+                    <div className="h-full border-2 border-ink bg-paper p-6 shadow-[4px_4px_0_var(--ac-shadow-ink)]">
                       <p className="text-2xl">{d.emoji}</p>
                       <h3 className="mt-2 font-display text-xl text-ink">{d.name}</h3>
                       <p className="mt-2 text-sm leading-relaxed text-ink/70">{d.description}</p>

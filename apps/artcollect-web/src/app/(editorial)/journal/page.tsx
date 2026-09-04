@@ -61,7 +61,7 @@ export default async function JournalPage() {
               <RevealOnScroll>
                 <Link
                   href={`/journal/${featured.slug}`}
-                  className="group grid grid-cols-1 gap-6 border-2 border-ink bg-paper p-4 shadow-[0_0_0_rgba(22,19,17,1)] transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-[5px_5px_0_rgba(22,19,17,1)] sm:grid-cols-[3fr_2fr] sm:p-5"
+                  className="group grid grid-cols-1 gap-6 border-2 border-ink bg-paper p-4 shadow-[0_0_0_var(--ac-shadow-ink)] transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-[5px_5px_0_var(--ac-shadow-ink)] sm:grid-cols-[3fr_2fr] sm:p-5"
                 >
                   <div className="aspect-[16/9] overflow-hidden bg-paper-deep">
                     {featured.coverImage && (
@@ -108,6 +108,7 @@ export default async function JournalPage() {
           </>
         )}
       </section>
+      <PartnersMarquee compact />
     </main>
   );
 }

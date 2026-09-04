@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Gavel, Ticket } from "lucide-react";
 import { FloatingNavbar } from "@/components/ui/FloatingNavbar";
+import { PartnersMarquee } from "@/components/sections/PartnersMarquee";
 import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
 import { getTimeline, type TimelineEntry, type TimelineStatus } from "@/lib/timeline";
 import { cn } from "@/lib/format";
@@ -96,7 +97,7 @@ export default async function TimelinePage() {
                     <RevealOnScroll key={`${entry.kind}-${entry.id}`} index={i % 6}>
                       <Link
                         href={entry.href}
-                        className="group relative flex gap-4 border-2 border-ink bg-paper p-4 shadow-[0_0_0_rgba(22,19,17,1)] transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_rgba(22,19,17,1)]"
+                        className="group relative flex gap-4 border-2 border-ink bg-paper p-4 shadow-[0_0_0_var(--ac-shadow-ink)] transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_var(--ac-shadow-ink)]"
                       >
                         <span
                           className="absolute -left-[29px] top-6 h-3 w-3 rounded-full border-2 border-ink bg-paper"
@@ -145,6 +146,7 @@ export default async function TimelinePage() {
           </div>
         )}
       </section>
+      <PartnersMarquee compact />
     </main>
   );
 }

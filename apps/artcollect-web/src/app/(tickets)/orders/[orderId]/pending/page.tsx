@@ -1,79 +1,50 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import QRCode from "qrcode";
-import { CheckCircle2, Clock, XCircle } from "lucide-react";
+import { CheckCircle2, Clock, Smartphone, XCircle } from "lucide-react";
 import { prisma } from "@artcollect/database";
 import { Annotation } from "@artcollect/ui";
-import { verifyTransaction } from "@/lib/flutterwave";
-import { finalizeOrderPayment, type IssuedTicket } from "@/lib/order-fulfillment";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { TicketShowcase } from "@/components/wallet/TicketShowcase";
 
 /**
- * Where the buyer lands after Flutterwave's hosted checkout.
+ * Where the buyer lands right after an M-Pesa STK prompt is sent.
  *
- * This is deliberately NOT treated as proof of payment on its own — per
- * docs/07, a client redirect never marks an order paid. Instead, if
- * Flutterwave's redirect included a `transaction_id`, this page uses it to
- * make its own server-to-server verification call and runs the same
- * idempotent `finalizeOrderPayment` the webhook uses. Whichever of the two
- * (this page or the webhook) gets there first is the one that actually
- * gets the raw QR tokens back — see order-fulfillment.ts.
+ * There is no redirect-with-transaction-id to verify here the way
+ * Flutterwave's flow had — Safaricom never sends the buyer back anywhere;
+ * confirmation only ever arrives at `/api/webhooks/mpesa/stk`, which is
+ * the sole place tickets actually get issued (see order-fulfillment.ts).
+ * This page just reads the order's current status and, while still
+ * pending, refreshes itself every few seconds until the webhook (or the
+ * buyer cancelling/timing out on their phone) resolves it. Raw ticket QR
+ * tokens are never persisted (docs/07) and the webhook — not this page —
+ * is what wins the fulfillment race, so they're never available to render
+ * here; the confirmation email (lib/email.ts) is what actually delivers
+ * the QR codes.
  */
 export const dynamic = "force-dynamic";
 
 export default async function OrderPendingPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ orderId: string }>;
-  searchParams: Promise<{ transaction_id?: string; status?: string }>;
 }) {
   const { orderId } = await params;
-  const { transaction_id: transactionId, status: flwStatus } = await searchParams;
 
   const order = await prisma.order.findUnique({
     where: { id: orderId },
-    include: { event: { select: { title: true } } },
+    include: { event: { select: { title: true } }, items: true },
   });
   if (!order) notFound();
 
-  let tickets: IssuedTicket[] = [];
-  let finalStatus: string = order.status;
-
-  if (order.status === "pending_payment" && transactionId && flwStatus !== "cancelled") {
-    try {
-      const verified = await verifyTransaction(transactionId);
-      if (verified.txRef === order.id) {
-        const result = await finalizeOrderPayment(order.id, verified);
-        tickets = result.tickets;
-        finalStatus = result.status === "already_paid" ? "paid" : result.status;
-      }
-    } catch {
-      // Re-verification failed or Flutterwave was unreachable just now —
-      // fall through to the "still confirming" state below. The webhook
-      // remains the authoritative path regardless of what happens here.
-    }
-  } else if (order.status === "paid") {
-    finalStatus = "paid";
-  }
-
-  const withTokens = tickets.filter(
-    (ticket): ticket is IssuedTicket & { token: string } => ticket.token !== null,
-  );
-  const qrTickets = await Promise.all(
-    withTokens.map(async (ticket) => ({
-      ...ticket,
-      qr: await QRCode.toDataURL(ticket.token, { margin: 1, width: 240 }),
-    })),
-  );
+  const firstTierName = order.items[0]?.tierNameSnapshot ?? "Ticket";
 
   return (
     <>
+      {order.status === "pending_payment" && <meta httpEquiv="refresh" content="4" />}
       <Header />
       <main className="mx-auto w-full max-w-2xl px-6 py-16">
-        {finalStatus === "paid" ? (
+        {order.status === "paid" ? (
           <>
             <div className="flex items-center gap-3 text-emerald-700">
               <CheckCircle2 />
@@ -90,50 +61,45 @@ export default async function OrderPendingPage({
               </Annotation>
             </div>
 
-            {/* The tactile ticket object (docs/11 Phase 6) — a flourish on
-                top of the functional wallet; dynamically imported,
-                intersection-gated, poster-first, and skipped entirely
-                under reduced motion. Special editions (VIP tiers) get the
-                holographic foil skin. */}
-            {qrTickets.length > 0 && order.event && (
+            {order.event && (
               <div className="mt-8">
                 <TicketShowcase
                   title={order.event.title}
-                  tierName={qrTickets[0]?.tierName ?? "Ticket"}
-                  foil={(qrTickets[0]?.tierName ?? "").toUpperCase().includes("VIP")}
+                  tierName={firstTierName}
+                  foil={firstTierName.toUpperCase().includes("VIP")}
                 />
               </div>
             )}
 
-            {qrTickets.length > 0 ? (
-              <div className="mt-8 space-y-6">
-                {qrTickets.map((ticket) => (
-                  <div key={ticket.id} className="rounded-2xl border border-zinc-200 p-6 text-center">
-                    {/* eslint-disable-next-line @next/next/no-img-element -- client-generated data: URI, not an optimizable remote image */}
-                    <img src={ticket.qr} alt="Ticket QR code" className="mx-auto h-48 w-48" />
-                    <p className="mt-3 text-sm font-medium text-zinc-900">{ticket.tierName}</p>
-                    <p className="text-xs text-zinc-400">Ticket {ticket.id}</p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="mt-8 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-700">
-                Your tickets are confirmed, but this page can&apos;t display their QR codes
-                right now — email delivery isn&apos;t wired up yet in this build. Contact
-                support with order <span className="font-mono">{order.id}</span>.
-              </p>
-            )}
+            <p className="mt-8 rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+              Your QR ticket{order.items.reduce((n, i) => n + i.quantity, 0) > 1 ? "s were" : " was"} sent
+              to <span className="font-medium">{order.buyerEmail}</span>. Show it at the door — each code
+              scans once.
+            </p>
           </>
-        ) : finalStatus === "payment_failed" ? (
-          <div className="flex items-center gap-3 text-red-600">
-            <XCircle />
-            <h1 className="font-display text-2xl font-bold text-zinc-900">Payment failed</h1>
-          </div>
+        ) : order.status === "payment_failed" ? (
+          <>
+            <div className="flex items-center gap-3 text-red-600">
+              <XCircle />
+              <h1 className="font-display text-2xl font-bold text-zinc-900">Payment failed</h1>
+            </div>
+            <p className="mt-2 text-zinc-500">
+              The M-Pesa prompt wasn&apos;t completed — cancelled, timed out, or declined. No charge was
+              made.
+            </p>
+          </>
         ) : (
-          <div className="flex items-center gap-3 text-amber-600">
-            <Clock />
-            <h1 className="font-display text-2xl font-bold text-zinc-900">Confirming your payment…</h1>
-          </div>
+          <>
+            <div className="flex items-center gap-3 text-amber-600">
+              <Clock />
+              <h1 className="font-display text-2xl font-bold text-zinc-900">Check your phone</h1>
+            </div>
+            <p className="mt-3 flex items-start gap-2 text-zinc-600">
+              <Smartphone size={18} className="mt-0.5 shrink-0 text-emerald-600" />
+              An M-Pesa prompt was sent to {order.buyerPhone ?? "your phone"}. Enter your PIN to
+              complete payment — this page updates on its own once it&apos;s confirmed.
+            </p>
+          </>
         )}
 
         <Link href="/" className="mt-8 inline-block text-sm text-emerald-700 hover:underline">

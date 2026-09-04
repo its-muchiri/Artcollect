@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { FloatingNavbar } from "@/components/ui/FloatingNavbar";
+import { PartnersMarquee } from "@/components/sections/PartnersMarquee";
 import { BrowseWall } from "@/components/art/BrowseWall";
 import { TornEdge } from "@artcollect/ui";
 import { listPublishedArtworks } from "@/lib/artworks";
@@ -42,6 +43,7 @@ export default async function BrowsePage() {
       <section className="mx-auto w-full max-w-6xl px-[var(--ac-gutter)] py-12">
         <BrowseWall artworks={artworks} />
       </section>
+      <PartnersMarquee compact />
     </main>
   );
 }

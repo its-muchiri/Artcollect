@@ -239,7 +239,7 @@ export function CollageHero() {
         {CUTOUTS.map((cutout, i) => (
           <div key={cutout.src} className={cn("hero-cutout absolute", cutout.className)}>
             <div
-              className="relative h-auto w-full shadow-[0_10px_30px_rgba(22,19,17,0.18)]"
+              className="relative h-auto w-full shadow-[0_10px_30px_rgba(var(--ac-shadow-rgb),0.18)]"
               style={{ rotate: `${cutout.rotate}deg` }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element -- external, unoptimized editorial imagery */}

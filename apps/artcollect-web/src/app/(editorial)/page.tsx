@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { FloatingNavbar } from "@/components/ui/FloatingNavbar";
 import { CollageHero } from "@/components/sections/CollageHero";
@@ -9,6 +10,7 @@ import { CausesBand } from "@/components/sections/CausesBand";
 import { ArtistSpotlight } from "@/components/sections/ArtistSpotlight";
 import { HowItWorks } from "@/components/sections/HowItWorks";
 import { EventsBand } from "@/components/sections/EventsBand";
+import { PartnersMarquee } from "@/components/sections/PartnersMarquee";
 import { TornEdge } from "@artcollect/ui";
 import { listFeaturedArtworks } from "@/lib/artworks";
 import { listPublishedArtists } from "@/lib/artists";
@@ -100,6 +102,8 @@ export default async function Home() {
 
         <HowItWorks />
 
+        <PartnersMarquee />
+
         {/* Editorial statement — Inter-only section, the calm between the
             louder vector bands around it. */}
         <section className="relative z-10 bg-paper">
@@ -138,7 +142,16 @@ export default async function Home() {
 
       <footer className="relative z-10 mx-auto w-full max-w-6xl px-[var(--ac-gutter)] py-16">
         <div className="flex flex-col items-start justify-between gap-4 border-t-2 border-ink pt-8 sm:flex-row sm:items-center">
-          <span className="font-display text-xl text-ink">ARTCOLLECT</span>
+          <span className="flex items-center gap-3">
+            <Image
+              src="/brand/monogram.png"
+              alt="artcollect.co.ke monogram"
+              width={30}
+              height={33}
+              className="h-8 w-auto"
+            />
+            <span className="font-display text-xl text-ink">ARTCOLLECT</span>
+          </span>
           <p className="text-sm text-ink/60">
             Art by East African artists · Tickets &amp; donations by TikoYetu · Nairobi
           </p>

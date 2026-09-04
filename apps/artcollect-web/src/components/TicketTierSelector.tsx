@@ -26,6 +26,7 @@ export function TicketTierSelector({ eventId, tiers, currency }: TicketTierSelec
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -50,6 +51,7 @@ export function TicketTierSelector({ eventId, tiers, currency }: TicketTierSelec
         eventId,
         buyerEmail: email,
         buyerName: name || undefined,
+        buyerPhone: phone,
         selections: tiers.map((tier) => ({ tierId: tier.id, quantity: quantities[tier.id] ?? 0 })),
       });
       // A successful call redirects and never resolves back here; reaching
@@ -140,6 +142,21 @@ export function TicketTierSelector({ eventId, tiers, currency }: TicketTierSelec
               className="mt-1 w-full rounded-lg border border-zinc-200 px-3 py-2.5 text-sm text-zinc-900 outline-none focus:border-emerald-500"
             />
           </div>
+          <div>
+            <label htmlFor="buyer-phone" className="text-sm font-medium text-zinc-700">
+              M-Pesa number <span className="text-zinc-400">(the payment prompt goes here)</span>
+            </label>
+            <input
+              id="buyer-phone"
+              type="tel"
+              inputMode="tel"
+              required
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="0712 345 678"
+              className="mt-1 w-full rounded-lg border border-zinc-200 px-3 py-2.5 text-sm text-zinc-900 outline-none focus:border-emerald-500"
+            />
+          </div>
         </div>
       )}
 
@@ -147,15 +164,15 @@ export function TicketTierSelector({ eventId, tiers, currency }: TicketTierSelec
 
       <button
         type="button"
-        disabled={totalQuantity === 0 || !email || isPending}
+        disabled={totalQuantity === 0 || !email || !phone || isPending}
         onClick={handleCheckout}
         className="mt-4 w-full rounded-full bg-emerald-600 py-3 text-sm font-semibold text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-400"
       >
         {isPending
-          ? "Redirecting to payment…"
+          ? "Sending M-Pesa prompt…"
           : totalQuantity === 0
             ? "Select a ticket"
-            : `Continue — ${totalQuantity} ticket${totalQuantity > 1 ? "s" : ""}`}
+            : `Pay with M-Pesa — ${totalQuantity} ticket${totalQuantity > 1 ? "s" : ""}`}
       </button>
     </div>
   );

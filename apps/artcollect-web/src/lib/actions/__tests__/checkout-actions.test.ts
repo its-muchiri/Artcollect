@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { initiateCheckoutAction, type CheckoutInput } from "../checkout-actions";
+import { normalizeKenyanPhone } from "@/lib/phone";
 /**
  * Verification-table row (docs/11): checkout server-action validation.
  * The UI's clamping is a UX convenience — these tests prove the server
@@ -16,6 +17,9 @@ const prismaMock = vi.hoisted(() => ({
     create: vi.fn(),
     findUniqueOrThrow: vi.fn(),
   },
+  payment: {
+    create: vi.fn(),
+  },
   ticket: {
     count: vi.fn(),
   },
@@ -26,8 +30,8 @@ const prismaMock = vi.hoisted(() => ({
   $transaction: vi.fn(),
 }));
 
-const flutterwaveMock = vi.hoisted(() => ({
-  initiateStandardPayment: vi.fn(),
+const mpesaMock = vi.hoisted(() => ({
+  initiateStkPush: vi.fn(),
 }));
 
 const navigationMock = vi.hoisted(() => ({
@@ -35,7 +39,7 @@ const navigationMock = vi.hoisted(() => ({
 }));
 
 vi.mock("@artcollect/database", () => ({ prisma: prismaMock }));
-vi.mock("@/lib/flutterwave", () => flutterwaveMock);
+vi.mock("@/lib/mpesa", () => mpesaMock);
 vi.mock("next/navigation", () => navigationMock);
 
 /** Builds a prisma `$transaction` mock that runs the callback against `tx`. */
@@ -72,6 +76,7 @@ function input(overrides: Partial<CheckoutInput> = {}): CheckoutInput {
   return {
     eventId: "event-1",
     buyerEmail: "buyer@example.com",
+    buyerPhone: "0712 345 678",
     selections: [{ tierId: "tier-1", quantity: 2 }],
     ...overrides,
   };
@@ -87,7 +92,11 @@ beforeEach(() => {
     currency: "KES",
   });
   prismaMock.inventoryHold.createMany.mockResolvedValue({ count: 1 });
-  flutterwaveMock.initiateStandardPayment.mockResolvedValue("https://checkout.flutterwave.com/pay/x");
+  prismaMock.payment.create.mockResolvedValue({ id: "payment-1" });
+  mpesaMock.initiateStkPush.mockResolvedValue({
+    merchantRequestId: "merchant-1",
+    checkoutRequestId: "ws_CO_test123",
+  });
   process.env.NEXT_PUBLIC_APP_URL = "https://tikoyetu.example";
 });
 
@@ -146,7 +155,7 @@ describe("initiateCheckoutAction — min/max per order", () => {
     const result = await initiateCheckoutAction(input({ selections: [{ tierId: "tier-1", quantity: 3 }] }));
 
     expect(result).toBeUndefined(); // redirect fired
-    expect(navigationMock.redirect).toHaveBeenCalledWith("https://checkout.flutterwave.com/pay/x");
+    expect(navigationMock.redirect).toHaveBeenCalledWith("/orders/order-1/pending");
   });
 });
 
@@ -191,6 +200,69 @@ describe("initiateCheckoutAction — live remaining (stale client state)", () =>
     expect(prismaMock.inventoryHold.createMany).toHaveBeenCalledWith({
       data: [expect.objectContaining({ tierId: "tier-1", quantity: 30, orderId: "order-1" })],
     });
+  });
+});
+
+describe("normalizeKenyanPhone — the send-to number", () => {
+  it("normalizes 07…, 01…, 2547… and +2547… forms to E.164", () => {
+    expect(normalizeKenyanPhone("0712 345 678")).toBe("+254712345678");
+    expect(normalizeKenyanPhone("0110 123 456")).toBe("+254110123456");
+    expect(normalizeKenyanPhone("254712345678")).toBe("+254712345678");
+    expect(normalizeKenyanPhone("+254712345678")).toBe("+254712345678");
+    expect(normalizeKenyanPhone("(0712) 345-678")).toBe("+254712345678");
+  });
+
+  it("rejects non-Kenyan or malformed numbers", () => {
+    expect(normalizeKenyanPhone("0812 345 678")).toBeNull();
+    expect(normalizeKenyanPhone("0712 345 67")).toBeNull();
+    expect(normalizeKenyanPhone("+14155551234")).toBeNull();
+    expect(normalizeKenyanPhone("hello")).toBeNull();
+  });
+});
+
+describe("initiateCheckoutAction — M-Pesa STK Push", () => {
+  beforeEach(() => {
+    prismaMock.ticketingEvent.findUnique.mockResolvedValue(eventFixture([tierFixture()]));
+    liveRemaining(50);
+    runTransactionWith(prismaMock);
+  });
+
+  it("sends the normalized phone to Daraja and redirects to the order's pending page", async () => {
+    const result = await initiateCheckoutAction(input({ buyerPhone: "0712 345 678" }));
+
+    expect(result).toBeUndefined();
+    expect(mpesaMock.initiateStkPush).toHaveBeenCalledWith(
+      expect.objectContaining({ phone: "+254712345678", amountMinor: 20000 }),
+    );
+    expect(navigationMock.redirect).toHaveBeenCalledWith("/orders/order-1/pending");
+  });
+
+  it("records a pending Payment keyed by the returned CheckoutRequestID", async () => {
+    await initiateCheckoutAction(input());
+
+    expect(prismaMock.payment.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        orderId: "order-1",
+        provider: "mpesa",
+        providerRef: "ws_CO_test123",
+        status: "pending",
+      }),
+    });
+  });
+
+  it("rejects a malformed phone before creating any order", async () => {
+    const result = await initiateCheckoutAction(input({ buyerPhone: "12345" }));
+
+    expect(result?.error).toMatch(/valid Safaricom number/i);
+    expect(prismaMock.order.create).not.toHaveBeenCalled();
+  });
+
+  it("returns a friendly error if Daraja rejects the push, without throwing", async () => {
+    mpesaMock.initiateStkPush.mockRejectedValue(new Error("Daraja is down"));
+
+    const result = await initiateCheckoutAction(input());
+
+    expect(result?.error).toMatch(/couldn.t send the m-pesa prompt/i);
   });
 });
 

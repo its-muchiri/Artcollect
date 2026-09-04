@@ -10,7 +10,9 @@
     "format": "prisma format",
     "migrate:dev": "prisma migrate dev",
     "studio": "prisma studio",
-    "seed": "tsx prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts",
+    "seed:journal": "tsx prisma/seed-journal.ts",
+    "journal:publish": "tsx prisma/publish-scheduled.ts"
   },
   "dependencies": {
     "@prisma/client": "^7.10.0",

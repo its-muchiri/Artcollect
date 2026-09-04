@@ -62,7 +62,7 @@ export default async function PostPage({
         </p>
 
         {post.coverImage && (
-          <figure className="relative mt-8 border-2 border-ink bg-paper-deep shadow-[6px_6px_0_rgba(22,19,17,0.9)]" style={{ rotate: "-0.6deg" }}>
+          <figure className="relative mt-8 border-2 border-ink bg-paper-deep shadow-[6px_6px_0_rgba(var(--ac-shadow-rgb),0.9)]" style={{ rotate: "-0.6deg" }}>
             {/* eslint-disable-next-line @next/next/no-img-element -- external, unoptimized editorial imagery */}
             <img
               src={post.coverImage}

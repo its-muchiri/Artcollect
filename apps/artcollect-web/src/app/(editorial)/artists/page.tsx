@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight, MapPin } from "lucide-react";
 import { Annotation, TapePiece } from "@artcollect/ui";
 import { FloatingNavbar } from "@/components/ui/FloatingNavbar";
+import { PartnersMarquee } from "@/components/sections/PartnersMarquee";
 import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
 import { listPublishedArtists } from "@/lib/artists";
 
@@ -51,7 +52,7 @@ export default async function ArtistsPage() {
               <RevealOnScroll key={artist.id} index={i % 6}>
                 <Link
                   href={`/artists/${artist.slug}`}
-                  className="group relative block border-2 border-ink bg-paper shadow-[0_0_0_rgba(22,19,17,1)] transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-[5px_5px_0_rgba(22,19,17,1)]"
+                  className="group relative block border-2 border-ink bg-paper shadow-[0_0_0_var(--ac-shadow-ink)] transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-[5px_5px_0_var(--ac-shadow-ink)]"
                 >
                   <div className="relative aspect-[4/5] overflow-hidden border-b-2 border-ink bg-paper-deep">
                     {/* Placeholder portrait (docs/11 assumption #1). */}
@@ -96,6 +97,7 @@ export default async function ArtistsPage() {
           </div>
         )}
       </section>
+      <PartnersMarquee compact />
     </main>
   );
 }

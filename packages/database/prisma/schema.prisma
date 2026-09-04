@@ -630,6 +630,10 @@ model Order {
   eventId    String      @map("event_id")
   buyerEmail String      @map("buyer_email")
   buyerName  String?     @map("buyer_name")
+  /// E.164 (+254…). Required for M-Pesa STK Push checkout — the number
+  /// the push actually goes to — so nullable only because older/other
+  /// checkout paths never collected one.
+  buyerPhone String?     @map("buyer_phone")
   userId     String?     @map("user_id")
   status     OrderStatus @default(pending_payment)
   totalMinor BigInt      @map("total_minor")
@@ -772,6 +776,22 @@ model Refund {
   order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@map("refunds")
+}
+
+/// Share short-links: stable codes like /s/Xk2B9Qa that 302-redirect to
+/// long artist/event/cause URLs, with click counts for social analytics.
+/// Codes are derived deterministically (hash of the target path) so the
+/// same URL always gets the same link — re-sharing never fragments counts.
+model ShortLink {
+  id            String    @id @default(uuid())
+  code          String    @unique
+  targetPath    String    @map("target_path")
+  clicks        Int       @default(0)
+  lastClickedAt DateTime? @map("last_clicked_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  @@index([targetPath])
+  @@map("short_links")
 }
 
 // ---------------------------------------------------------------------------

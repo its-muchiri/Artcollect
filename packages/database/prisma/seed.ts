@@ -438,7 +438,7 @@ async function main() {
       userId: benUser.id,
       slug: "ben-mungai",
       tagline: "Acrylic painter blending pop-culture portraiture with quiet, conceptual still life, as Studio ArtDid.co.",
-      bio: "Ben Mungai paints under the name Studio ArtDid.co. His acrylic and oil work moves between two registers: sharp pop-culture portraiture — Batman, a hollow-eyed antihero lifted from manga, a straw-hatted pirate crossing paths with a kung fu panda — and quieter, more conceptual pieces, like a handful of roses rooted in a hand grenade. A recurring figure, part soldier and part statesman, threads a red beret and a web of starlines across the continent behind him. Across both registers, Ben works in flat, confident color blocks and hard outlines — more comic panel than classical canvas — immediate up close and considered from across a room.",
+      bio: "Ben Mungai paints under the name Studio ArtDid.co. His acrylic and oil work moves between two registers: sharp pop-culture portraiture — Batman, a hollow-eyed antihero lifted from manga, a straw-hatted pirate crossing paths with a kung fu panda — and quieter, more conceptual pieces, like a handful of roses rooted in a hand grenade. A recurring figure, part soldier and part statesman, threads a red beret and a web of starlines across the continent behind him. Lately the palette drops out altogether in a track of black-on-raw-canvas silhouettes — a ronin wading through pampas grass, a footballer frozen mid-volley — brushed more like ink than paint, while pieces like Ngamia 1, a fuel station trading under a sky of candlestick charts, turn the same flat cartoon language into straight commentary. Across every register, Ben works in flat, confident color blocks and hard outlines — more comic panel than classical canvas — immediate up close and considered from across a room.",
       location: "Kenya",
       websiteUrl: "https://artdid.co",
       visibility: "published",
@@ -482,6 +482,15 @@ async function main() {
         description:
           "Brings the same technique to characters pulled from manga, anime, and film, treating fan art with the same seriousness as his other portraits.",
         sortOrder: 2,
+      },
+      {
+        artistId: ben.id,
+        name: "Monochrome Silhouettes",
+        emoji: "🖤",
+        tier: "secondary",
+        description:
+          "A recurring black-on-raw-canvas register — a ronin wading through grass, a footballer frozen mid-volley — brushed more like ink than paint.",
+        sortOrder: 3,
       },
     ],
   });
@@ -560,9 +569,9 @@ async function main() {
       slug: "hollow",
       medium: "Acrylic on canvas",
       description:
-        "A skull-like mask in stark black, white, and red gashes, built from the same hard-edged, high-contrast language as Ben's other character studies. Photographed the day it went up on the wall — nail still in hand.",
+        "A skull-like mask in stark black, white, and red gashes, a single yellow eye doing all the looking, built from the same hard-edged, high-contrast language as Ben's other character studies. The jagged grin holds the center; everything around it is slash and shadow.",
       image: "/artists/ben-mungai/hollow.jpeg",
-      alt: "Ben Mungai holding a hammer beside a black, white, and red mask-like painting",
+      alt: "Acrylic painting of a white skull-like mask with red stripes and a yellow eye against a black ground",
       priceMinor: 2900000n,
     },
     {
@@ -584,6 +593,86 @@ async function main() {
       image: "/artists/ben-mungai/continental.jpeg",
       alt: "Portrait painting of a figure in a red beret against a starline map of Africa",
       priceMinor: 4500000n,
+    },
+    {
+      title: "Ngamia 1",
+      slug: "ngamia-1",
+      medium: "Acrylic on canvas",
+      description:
+        "A forecourt painted like a stock chart: a Rubis price board reading Super 215.6 and Diesel 214.3, a yellow Shell pump, a child's swing, all under a sky of rising red-and-green candlesticks. At the edge, the Ngamia 1 sign — the well that struck oil in Turkana — leans over a field of toppling derricks and the words Crude Oil, Pawa!!. The country's oil story, told at the pump where everyone actually meets it.",
+      image: "/artists/ben-mungai/ngamia-1.jpeg",
+      alt: "Acrylic painting of a Rubis fuel station under a sky of stock-market candlestick charts, with a Ngamia 1 sign and toppling oil derricks",
+      priceMinor: 3600000n,
+    },
+    {
+      title: "The Goat",
+      slug: "the-goat",
+      medium: "Acrylic on canvas",
+      description:
+        "A grey goat in full caricature — heavy-lidded orange eyes, swept yellow horns curling off the canvas — set against a red-to-gold gradient. The brushwork softens into blended fur around the chin, a slower touch than the flat color blocks elsewhere, without losing the cartoon timing of the stare.",
+      image: "/artists/ben-mungai/the-goat.jpeg",
+      alt: "Cartoon-style acrylic painting of a grey goat with curled yellow horns and half-closed orange eyes against a red and gold background",
+      priceMinor: 2600000n,
+    },
+    {
+      title: "The Singer",
+      slug: "the-singer",
+      medium: "Acrylic on canvas",
+      description:
+        "A figure mid-note, mouth thrown open past the edges of the face, hunched over an orange guitar against a deep teal wall crossed by bands of light. No eyes, no eyebrows — the whole performance is carried by the mouth and the shoulders, painted big and simple.",
+      image: "/artists/ben-mungai/the-singer.jpeg",
+      alt: "Acrylic painting of a figure in a green shirt singing over an orange guitar against a teal wall",
+      priceMinor: 3000000n,
+    },
+    {
+      title: "Against the Moon",
+      slug: "against-the-moon",
+      medium: "Acrylic on canvas",
+      description:
+        "Three colors, one figure: a black silhouette under an umbrella crosses a full white moon set in a flat red field. The most reduced piece in the group — closer to a poster than a portrait.",
+      image: "/artists/ben-mungai/against-the-moon.jpeg",
+      alt: "Silhouette painting of a figure with an umbrella crossing a white moon on a red background",
+      priceMinor: 2800000n,
+    },
+    {
+      title: "Glow",
+      slug: "glow",
+      medium: "Acrylic on canvas",
+      description:
+        "A small night sea: a dark-hulled boat with a red sail sits on deep blue water under a burnt-orange sky, the title GLOW stenciled into the corner. The pale green moon is the single coolest note in an otherwise warm painting, and everything else is mixed to make it carry.",
+      image: "/artists/ben-mungai/glow.jpeg",
+      alt: "Acrylic painting of a red-sailed boat on dark water under an orange sky and pale green moon, titled Glow",
+      priceMinor: 1500000n,
+    },
+    {
+      title: "Striker",
+      slug: "striker",
+      medium: "Acrylic on canvas",
+      description:
+        "A footballer frozen mid-volley in pure manga grammar — spiky hair, locked glare, a ball hanging in the top corner — in greyscale on raw canvas, with jigsaw pieces drifting through the air around him. Fan-art energy, draftsmanship-first execution; the only color is the canvas itself.",
+      image: "/artists/ben-mungai/striker.jpeg",
+      alt: "Monochrome manga-style painting of a footballer striking a ball, in greyscale on raw canvas",
+      priceMinor: 1900000n,
+    },
+    {
+      title: "Ronin",
+      slug: "ronin",
+      medium: "Acrylic on canvas",
+      description:
+        "A masterless samurai from behind, two swords crossed on his back, wading through pampas grass as birds scatter — the whole scene in black on raw canvas, brushed more like ink than paint. Stamped with the Studio ArtDid.co mark low in the grass; the quietest thing here and the most controlled.",
+      image: "/artists/ben-mungai/ronin.jpeg",
+      alt: "Black silhouette painting of a samurai with two crossed swords walking through tall grass",
+      priceMinor: 2700000n,
+    },
+    {
+      title: "Green Cat",
+      slug: "green-cat",
+      medium: "Acrylic on canvas",
+      description:
+        "A house cat scaled up to mural logic: teal-green fur, enormous black eyes with daylight in them, whiskers scratched in with a dry brush against a flat yellow field. Patches of raw canvas and pencil under-drawing still show at the edge — a portrait caught mid-purr, and honest about it.",
+      image: "/artists/ben-mungai/green-cat.jpeg",
+      alt: "Acrylic painting of a teal-green cat with large black eyes on a yellow background, with areas of raw canvas still visible",
+      priceMinor: 2200000n,
     },
   ];
 

@@ -2,6 +2,7 @@ import "server-only";
 import { prisma, type PaymentProvider } from "@artcollect/database";
 import type { VerifiedTransaction } from "@/lib/flutterwave";
 import { generateTicketToken } from "@/lib/qr";
+import { sendTicketEmail } from "@/lib/ticket-email";
 
 export interface IssuedTicket {
   id: string;
@@ -56,7 +57,11 @@ export async function finalizeOrderPayment(
 ): Promise<FulfillmentResult> {
   const order = await prisma.order.findUnique({
     where: { id: orderId },
-    include: { items: true, tickets: true },
+    include: {
+      items: true,
+      tickets: true,
+      event: { select: { title: true, venue: true, startsAt: true } },
+    },
   });
   if (!order) return { status: "not_found", tickets: [] };
 
@@ -112,7 +117,27 @@ export async function finalizeOrderPayment(
     await tx.inventoryHold.deleteMany({ where: { orderId: order.id } });
   });
 
-  if (issued.length > 0) return { status: "paid", tickets: issued };
+  if (issued.length > 0) {
+    // Whoever wins this race is the only caller that ever sees the raw
+    // tokens (docs/07) — so this is the one place a confirmation email can
+    // be sent from. Never lets a delivery failure undo a successful,
+    // already-committed payment: caught and logged, not thrown.
+    try {
+      await sendTicketEmail({
+        to: order.buyerEmail,
+        buyerName: order.buyerName,
+        eventTitle: order.event?.title ?? "Your event",
+        eventVenue: order.event?.venue ?? null,
+        eventStartsAt: order.event?.startsAt ?? null,
+        tickets: issued
+          .filter((t): t is IssuedTicket & { token: string } => t.token !== null)
+          .map((t) => ({ id: t.id, tierName: t.tierName, token: t.token })),
+      });
+    } catch (error) {
+      console.error(`Failed to send ticket email for order ${order.id}:`, error);
+    }
+    return { status: "paid", tickets: issued };
+  }
 
   // Lost the race: the other caller issued the tickets. Report the order
   // as paid with a count, but no tokens to show.

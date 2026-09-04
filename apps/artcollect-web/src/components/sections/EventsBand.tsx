@@ -37,7 +37,7 @@ export function EventsBand({ events }: { events: ArtEventCard[] }) {
             {events.map((event) => (
               <article
                 key={event.id}
-                className="flex flex-col overflow-hidden border-2 border-ink bg-paper shadow-[0_0_0_rgba(22,19,17,1)] transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_rgba(22,19,17,1)] sm:flex-row"
+                className="flex flex-col overflow-hidden border-2 border-ink bg-paper shadow-[0_0_0_var(--ac-shadow-ink)] transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_var(--ac-shadow-ink)] sm:flex-row"
               >
                 <div className="relative aspect-[16/10] shrink-0 border-b-2 border-ink bg-paper-deep sm:aspect-auto sm:w-2/5 sm:border-b-0 sm:border-r-2">
                   {event.coverImage && (

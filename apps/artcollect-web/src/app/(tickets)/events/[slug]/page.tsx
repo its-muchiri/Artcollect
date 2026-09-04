@@ -11,6 +11,8 @@ import { GraffitiEventHeader } from "@/components/graffiti/GraffitiEventHeader";
 import { getEventStyle } from "@/lib/event-style";
 import { getEventBySlug } from "@/lib/ticketing-events";
 import { formatEventDate } from "@/lib/format";
+import { ensureShortLink } from "@/lib/short-links";
+import { ShareLinkButton } from "@/components/ShareLinkButton";
 
 // No generateStaticParams, and rendering forced dynamic: ticket
 // availability changes continuously, so this route is intentionally never
@@ -96,6 +98,7 @@ export default async function EventPage({
   // off exactly this switch; every other category stays the calm default.
   const style = getEventStyle(event.category);
   const isGraffiti = style === "graffiti";
+  const shareCode = await ensureShortLink(`/events/${event.slug}`);
 
   return (
     <>
@@ -147,7 +150,15 @@ export default async function EventPage({
                 {event.title}
               </h1>
             )}
-            <p className="mt-1 text-zinc-500">by {event.organiser}</p>
+            <div className="mt-2 flex flex-wrap items-center gap-3">
+              <p className="text-zinc-500">by {event.organiser}</p>
+              <ShareLinkButton
+                code={shareCode}
+                title={`${event.title} — tickets on TikoYetu`}
+                label="Share event"
+                className="inline-flex items-center gap-2 rounded-full border border-zinc-300 px-3.5 py-1.5 text-xs font-semibold text-zinc-600 transition-colors hover:border-zinc-900 hover:text-zinc-900"
+              />
+            </div>
 
             <div className="mt-6 flex flex-col gap-3 text-sm text-zinc-600 sm:flex-row sm:gap-8">
               <span className="flex items-center gap-2">

@@ -38,7 +38,7 @@ export function ArtworkTile({ artwork, className }: { artwork: ArtworkCard; clas
       href={`/artists/${artwork.artistSlug}`}
       className={cn(
         "group relative block border-2 border-ink bg-paper transition-[transform,box-shadow] duration-200",
-        "shadow-[0_0_0_rgba(22,19,17,1)] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_rgba(22,19,17,1)]",
+        "shadow-[0_0_0_var(--ac-shadow-ink)] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_var(--ac-shadow-ink)]",
         className,
       )}
     >

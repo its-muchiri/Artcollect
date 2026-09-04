@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { Anton, Caveat, Inter } from "next/font/google";
 import "./globals.css";
@@ -64,12 +64,27 @@ export const metadata: Metadata = {
     siteName: "ArtCollect",
     locale: "en_KE",
     type: "website",
+    images: [{ url: "/brand/og.png", width: 1200, height: 630, alt: "artcollect.co.ke — Collect the work you can't stop thinking about" }],
   },
   twitter: {
     card: "summary_large_image",
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
+    images: ["/brand/og.png"],
   },
+};
+
+/*
+ * Browser/OS chrome follows the system scheme (phone settings), matching
+ * the token flip in tokens.css — warm paper in light, the brand's warm
+ * near-black in dark. Icons: app/icon.png + app/apple-icon.png (generated
+ * from the artcollect.co.ke monogram) are picked up automatically.
+ */
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f5f1e8" },
+    { media: "(prefers-color-scheme: dark)", color: "#17130f" },
+  ],
 };
 
 export interface RootLayoutProps {

@@ -2,7 +2,8 @@
 
 import { redirect } from "next/navigation";
 import { prisma } from "@artcollect/database";
-import { initiateStandardPayment } from "@/lib/flutterwave";
+import { initiateStkPush } from "@/lib/mpesa";
+import { normalizeKenyanPhone } from "@/lib/phone";
 
 export interface CheckoutSelection {
   tierId: string;
@@ -13,6 +14,8 @@ export interface CheckoutInput {
   eventId: string;
   buyerEmail: string;
   buyerName?: string;
+  /** Required — this is the number the M-Pesa STK prompt actually goes to. */
+  buyerPhone: string;
   selections: CheckoutSelection[];
 }
 
@@ -31,8 +34,11 @@ function requireEnv(name: string): string {
 }
 
 /**
- * Creates a pending order + short-lived inventory holds, then redirects the
- * buyer to Flutterwave's hosted checkout.
+ * Creates a pending order + short-lived inventory holds, sends an M-Pesa
+ * STK Push to the buyer's phone, then redirects to the order's pending
+ * page — which polls for the async callback result rather than a redirect
+ * carrying a transaction id (Safaricom never redirects the buyer back;
+ * confirmation only ever arrives at the callback URL).
  *
  * Every quantity is re-validated here against the tier's own min/max *and*
  * live availability (capacity - issued tickets - active holds), computed
@@ -44,6 +50,11 @@ function requireEnv(name: string): string {
 export async function initiateCheckoutAction(input: CheckoutInput): Promise<CheckoutResult | undefined> {
   const selections = input.selections.filter((s) => s.quantity > 0);
   if (selections.length === 0) return { error: "Select at least one ticket." };
+
+  const normalizedPhone = normalizeKenyanPhone(input.buyerPhone);
+  if (!normalizedPhone) {
+    return { error: "Enter a valid Safaricom number (e.g. 0712 345 678) — this is where the M-Pesa prompt goes." };
+  }
 
   const event = await prisma.ticketingEvent.findUnique({
     where: { id: input.eventId },
@@ -111,6 +122,7 @@ export async function initiateCheckoutAction(input: CheckoutInput): Promise<Chec
           eventId: event.id,
           buyerEmail: input.buyerEmail,
           buyerName: input.buyerName,
+          buyerPhone: normalizedPhone,
           status: "pending_payment",
           totalMinor,
           currency: event.currency,
@@ -137,15 +149,33 @@ export async function initiateCheckoutAction(input: CheckoutInput): Promise<Chec
   const order = await prisma.order.findUniqueOrThrow({ where: { id: orderId } });
   const appUrl = requireEnv("NEXT_PUBLIC_APP_URL");
 
-  const checkoutUrl = await initiateStandardPayment({
-    txRef: order.id,
-    amountMinor: Number(order.totalMinor),
-    currency: order.currency,
-    redirectUrl: `${appUrl}/orders/${order.id}/pending`,
-    customerEmail: order.buyerEmail,
-    customerName: order.buyerName ?? undefined,
-    title: event.title,
-  });
+  try {
+    const stk = await initiateStkPush({
+      phone: normalizedPhone,
+      amountMinor: Number(order.totalMinor),
+      accountReference: event.title,
+      transactionDesc: "Tickets",
+      callbackUrl: `${appUrl}/api/webhooks/mpesa/stk`,
+    });
 
-  redirect(checkoutUrl);
+    // Correlates the async callback back to this order — Safaricom's
+    // callback carries CheckoutRequestID, not any reference of ours (see
+    // lib/mpesa.ts's module doc). No tokens/amount are trusted from the
+    // callback itself either way; the webhook re-queries this transaction
+    // before finalizing anything.
+    await prisma.payment.create({
+      data: {
+        orderId: order.id,
+        provider: "mpesa",
+        providerRef: stk.checkoutRequestId,
+        status: "pending",
+        amountMinor: order.totalMinor,
+        currency: order.currency,
+      },
+    });
+  } catch {
+    return { error: "Couldn't send the M-Pesa prompt — check the number and try again." };
+  }
+
+  redirect(`/orders/${order.id}/pending`);
 }

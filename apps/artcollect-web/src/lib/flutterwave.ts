@@ -39,6 +39,8 @@ export interface InitiatePaymentParams {
   redirectUrl: string;
   customerEmail: string;
   customerName?: string;
+  /** E.164 (+254…) buyer phone — passed to Flutterwave so M-Pesa/checkout can prefill. */
+  customerPhone?: string;
   /** Shown on Flutterwave's hosted checkout page. */
   title: string;
 }
@@ -62,6 +64,9 @@ export async function initiateStandardPayment(params: InitiatePaymentParams): Pr
       customer: {
         email: params.customerEmail,
         name: params.customerName,
+        // Optional but recommended for M-Pesa flows: Flutterwave can
+        // prefill the payer's number on its hosted checkout.
+        ...(params.customerPhone ? { phone_number: params.customerPhone } : {}),
       },
       customizations: {
         title: params.title,

@@ -26,7 +26,7 @@ function PeelCard({ piece, index }: { piece: CorkboardPiece; index: number }) {
       )}
       style={{ rotate: `${piece.tilt}deg` }}
     >
-      <div className="relative border-2 border-ink bg-paper p-2 shadow-[4px_4px_0_rgba(22,19,17,0.85)]">
+      <div className="relative border-2 border-ink bg-paper p-2 shadow-[4px_4px_0_rgba(var(--ac-shadow-rgb),0.85)]">
         {/* Sticker-peel corner: a folded sticker that lifts on hover
             (clip-path + scale, transform-only). */}
         <span
@@ -34,7 +34,7 @@ function PeelCard({ piece, index }: { piece: CorkboardPiece; index: number }) {
           className="absolute right-0 top-0 z-20 h-10 w-10 origin-top-right bg-highlighter transition-all duration-200 group-hover:scale-125 group-hover:rotate-3"
           style={{
             clipPath: "polygon(0 0, 100% 100%, 100% 0)",
-            boxShadow: "-2px 2px 5px rgba(22,19,17,0.3)",
+            boxShadow: "-2px 2px 5px rgba(var(--ac-shadow-rgb),0.3)",
           }}
         />
 

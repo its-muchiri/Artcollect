@@ -43,7 +43,7 @@ export function HowItWorks() {
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-3">
           {STEPS.map(({ Icon, Illustration, title, body }, i) => (
             <div key={title} className="flex flex-col gap-5">
-              <div className="border-2 border-ink bg-paper shadow-[4px_4px_0_rgba(22,19,17,1)]">
+              <div className="border-2 border-ink bg-paper shadow-[4px_4px_0_var(--ac-shadow-ink)]">
                 <Illustration />
               </div>
               <div>

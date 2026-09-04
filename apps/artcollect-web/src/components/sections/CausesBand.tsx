@@ -41,7 +41,7 @@ export function CausesBand({ causes }: { causes: CauseCard[] }) {
               key={cause.id}
               index={i}
               as="article"
-              className="relative border-2 border-ink bg-paper p-4 shadow-[5px_5px_0_rgba(22,19,17,1)]"
+              className="relative border-2 border-ink bg-paper p-4 shadow-[5px_5px_0_var(--ac-shadow-ink)]"
               style={{ rotate: `${i % 2 === 0 ? -0.9 : 0.8}deg` }}
             >
               <div className="relative aspect-[16/9] overflow-hidden border-2 border-ink bg-paper-deep">

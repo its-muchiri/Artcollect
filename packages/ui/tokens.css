@@ -14,6 +14,12 @@
   --ac-paper: #f5f1e8;
   --ac-ink: #161311;
 
+  /* Hard offset-shadow ink (the collage "sticker lift"). Tokenised so the
+     dark scheme can keep the lift readable instead of dropping black
+     shadows on a near-black canvas. */
+  --ac-shadow-ink: rgba(22, 19, 17, 1);
+  --ac-shadow-rgb: 22, 19, 17;
+
   /* The five accents — one per style lane. */
   --ac-coral: #e8442e; /* collage */
   --ac-cobalt: #1f4fd8; /* vector */
@@ -53,4 +59,26 @@
   --ac-motion-fast: 160ms;
   --ac-motion-base: 320ms;
   --ac-motion-slow: 640ms;
+}
+
+/*
+ * Dark scheme, driven purely by `prefers-color-scheme` (docs/11's
+ * "components never make their own light" rule — no `.dark` class, no
+ * toggle, no flash). The canvas/ink pair flips to the brand's warm
+ * near-black/cream (the artcollect.co.ke mark's own ground), the two
+ * accents that were tuned for light paper get brightened so they keep
+ * their contrast role, and everything else (coral, lime, hot-pink,
+ * highlighter, sticker-pink) already reads on both canvases so it's
+ * untouched.
+ */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ac-paper: #17130f;
+    --ac-ink: #f2ecdf;
+    --ac-paper-deep: #252019;
+    --ac-cobalt: #8ba3f5;
+    --ac-marker: #e0684f;
+    --ac-shadow-ink: rgba(0, 0, 0, 0.85);
+    --ac-shadow-rgb: 0, 0, 0;
+  }
 }

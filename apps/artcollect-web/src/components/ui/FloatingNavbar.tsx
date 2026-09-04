@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, useReducedMotion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { useLenisScroll } from "@/hooks/useLenis";
@@ -46,14 +47,24 @@ export function FloatingNavbar() {
           condensed: { paddingLeft: 14, paddingRight: 14, paddingTop: 7, paddingBottom: 7 },
         }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
-        className="flex w-full max-w-2xl items-center justify-between gap-4 rounded-full border-2 border-ink bg-paper shadow-[3px_4px_0_rgba(22,19,17,1)] sm:gap-8"
+        className="flex w-full max-w-2xl items-center justify-between gap-4 rounded-full border-2 border-ink bg-paper shadow-[3px_4px_0_var(--ac-shadow-ink)] sm:gap-8"
       >
         <Link
           href="/"
-          className="font-display text-lg leading-none tracking-wide text-ink"
+          className="flex items-center gap-2.5"
           onClick={() => setMenuOpen(false)}
         >
-          ARTCOLLECT
+          <Image
+            src="/brand/monogram.png"
+            alt="artcollect.co.ke monogram"
+            width={24}
+            height={26}
+            className="h-6 w-auto"
+            priority
+          />
+          <span className="font-display text-lg leading-none tracking-wide text-ink">
+            ARTCOLLECT
+          </span>
         </Link>
 
         <nav className="hidden items-center gap-1 sm:flex" onMouseLeave={() => setHovered(null)}>
@@ -101,7 +112,7 @@ export function FloatingNavbar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="mt-2 flex w-full max-w-2xl flex-col gap-1 rounded-3xl border-2 border-ink bg-paper p-3 shadow-[3px_4px_0_rgba(22,19,17,1)] sm:hidden"
+            className="mt-2 flex w-full max-w-2xl flex-col gap-1 rounded-3xl border-2 border-ink bg-paper p-3 shadow-[3px_4px_0_var(--ac-shadow-ink)] sm:hidden"
           >
             {NAV_LINKS.map((link) => (
               <Link

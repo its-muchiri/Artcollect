@@ -124,7 +124,7 @@ export function Coverflow({
           >
             <a
               href={item.href}
-              className="group block border-2 border-ink bg-paper shadow-[4px_4px_0_rgba(22,19,17,1)] transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-[6px_6px_0_rgba(22,19,17,1)] will-change-transform"
+              className="group block border-2 border-ink bg-paper shadow-[4px_4px_0_var(--ac-shadow-ink)] transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-[6px_6px_0_var(--ac-shadow-ink)] will-change-transform"
             >
               <div className="aspect-[16/10] overflow-hidden border-b-2 border-ink bg-paper-deep">
                 {item.image && (

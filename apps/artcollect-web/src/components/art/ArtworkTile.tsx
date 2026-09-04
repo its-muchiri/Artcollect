@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { ArtworkCard } from "@/lib/artworks";
+import type { ArtworkAuctionBadge, ArtworkCard } from "@/lib/artworks";
 import { cn, formatKes } from "@/lib/format";
 
 export const AVAILABILITY_LABEL: Record<ArtworkCard["availability"], string> = {
@@ -12,6 +12,18 @@ export const AVAILABILITY_CLASS: Record<ArtworkCard["availability"], string> = {
   available: "bg-cobalt text-paper",
   low: "bg-coral text-ink",
   sold: "bg-ink/60 text-paper",
+};
+
+export const AUCTION_LABEL: Record<ArtworkAuctionBadge["status"], string> = {
+  scheduled: "Auction soon",
+  active: "Live auction",
+  sold: "Sold at auction",
+};
+
+export const AUCTION_CLASS: Record<ArtworkAuctionBadge["status"], string> = {
+  scheduled: "bg-paper text-ink",
+  active: "bg-coral text-ink",
+  sold: "bg-ink text-paper",
 };
 
 /**
@@ -48,6 +60,16 @@ export function ArtworkTile({ artwork, className }: { artwork: ArtworkCard; clas
         >
           {AVAILABILITY_LABEL[artwork.availability]}
         </span>
+        {artwork.auction && (
+          <span
+            className={cn(
+              "absolute right-2 top-2 border-2 border-ink px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide",
+              AUCTION_CLASS[artwork.auction.status],
+            )}
+          >
+            {AUCTION_LABEL[artwork.auction.status]}
+          </span>
+        )}
       </div>
 
       <div className="space-y-1 p-4">

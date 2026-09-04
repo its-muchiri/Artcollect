@@ -79,6 +79,20 @@ export function FloatingNavbar() {
             )}
             <span className="relative z-10">Tickets</span>
           </Link>
+          <Link
+            href="/timeline"
+            onMouseEnter={() => setHovered("Timeline")}
+            className="relative rounded-full px-3 py-1.5 text-sm font-medium text-ink/70 transition-colors hover:text-ink"
+          >
+            {hovered === "Timeline" && (
+              <motion.span
+                layoutId="nav-indicator"
+                className="absolute inset-0 -z-10 rounded-full bg-paper-deep"
+                transition={{ type: "spring", stiffness: 350, damping: 30 }}
+              />
+            )}
+            <span className="relative z-10">Timeline</span>
+          </Link>
         </nav>
 
         <motion.a

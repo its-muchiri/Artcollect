@@ -289,9 +289,34 @@ model Artwork {
   inquiries       ArtInquiry[]
   orderItems      ArtOrderItem[]
   collectionItems CollectionItem[]
+  auction         ArtworkAuction?
 
   @@index([status])
   @@map("artworks")
+}
+
+/// One art-sale auction window for a single original artwork. There is no
+/// stored status column — "scheduled" / "active" / "sold" is always derived
+/// from `startsAt`/`endsAt` against the current time (see
+/// `apps/artcollect-web/src/lib/auctions.ts`), because this app has no
+/// background scheduler that could flip a stored value at the right
+/// instant. Auctions launch on the 1st and 15th of each month and run 35
+/// days — long enough that two consecutive designated launches always
+/// overlap, so at least two auctions are active at any given time, well
+/// past the 7-day minimum a single auction must run.
+model ArtworkAuction {
+  id                 String   @id @default(uuid())
+  artworkId          String   @unique @map("artwork_id")
+  startsAt           DateTime @map("starts_at")
+  endsAt             DateTime @map("ends_at")
+  startingPriceMinor BigInt   @map("starting_price_minor")
+  currency           String   @db.Char(3)
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  artwork Artwork @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+
+  @@index([startsAt])
+  @@map("artwork_auctions")
 }
 
 enum ArtworkVariantType {

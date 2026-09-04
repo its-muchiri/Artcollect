@@ -1,5 +1,6 @@
 import "server-only";
 import { prisma } from "@artcollect/database";
+import { listAuctionsByArtworkSlug, type AuctionCard } from "@/lib/auctions";
 
 /**
  * ArtCollect artwork reads for the vector-art browsing surfaces
@@ -8,6 +9,14 @@ import { prisma } from "@artcollect/database";
  */
 
 export type ArtworkKind = "collage" | "print" | "photography" | "painting" | "other";
+
+export interface ArtworkAuctionBadge {
+  status: AuctionCard["status"];
+  startsAt: string;
+  endsAt: string;
+  startingPriceMinor: number;
+  currency: string;
+}
 
 export interface ArtworkCard {
   id: string;
@@ -25,6 +34,8 @@ export interface ArtworkCard {
   currency: string | null;
   /** Coarse availability off the best variant's remaining stock. */
   availability: "available" | "low" | "sold";
+  /** Present only while this piece has (or had) an auction window. */
+  auction: ArtworkAuctionBadge | null;
 }
 
 /**
@@ -58,7 +69,7 @@ interface ArtworkRow {
   variants: { priceMinor: bigint; currency: string; stockQuantity: number }[];
 }
 
-function flatten(artwork: ArtworkRow): ArtworkCard {
+function flatten(artwork: ArtworkRow, auction: AuctionCard | undefined): ArtworkCard {
   const inStock = artwork.variants.filter((v) => v.stockQuantity > 0);
   const best = inStock.length
     ? inStock.reduce((lowest, v) => (v.priceMinor < lowest.priceMinor ? v : lowest))
@@ -79,20 +90,32 @@ function flatten(artwork: ArtworkRow): ArtworkCard {
     priceMinor: best ? Number(best.priceMinor) : null,
     currency: best?.currency ?? null,
     availability: best ? availabilityFromStock(best.stockQuantity) : "sold",
+    auction: auction
+      ? {
+          status: auction.status,
+          startsAt: auction.startsAt,
+          endsAt: auction.endsAt,
+          startingPriceMinor: auction.startingPriceMinor,
+          currency: auction.currency,
+        }
+      : null,
   };
 }
 
 export async function listPublishedArtworks(): Promise<ArtworkCard[]> {
-  const artworks = await prisma.artwork.findMany({
-    where: { status: "published", deletedAt: null },
-    include: {
-      artist: { select: { slug: true, user: { select: { name: true } } } },
-      media: { orderBy: { sortOrder: "asc" } },
-      variants: true,
-    },
-    orderBy: { createdAt: "desc" },
-  });
-  return artworks.map(flatten);
+  const [artworks, auctionsBySlug] = await Promise.all([
+    prisma.artwork.findMany({
+      where: { status: "published", deletedAt: null },
+      include: {
+        artist: { select: { slug: true, user: { select: { name: true } } } },
+        media: { orderBy: { sortOrder: "asc" } },
+        variants: true,
+      },
+      orderBy: { createdAt: "desc" },
+    }),
+    listAuctionsByArtworkSlug(),
+  ]);
+  return artworks.map((artwork) => flatten(artwork, auctionsBySlug.get(artwork.slug)));
 }
 
 export async function listFeaturedArtworks(limit = 4): Promise<ArtworkCard[]> {

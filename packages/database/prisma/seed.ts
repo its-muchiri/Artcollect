@@ -616,6 +616,69 @@ async function main() {
     });
   }
 
+  // Art-sale auctions: launched on the 1st and 15th of each month, each
+  // running 35 days — comfortably past the 7-day minimum, and long enough
+  // relative to that ~14-day launch cadence that two consecutive launches
+  // always overlap, so at least two auctions are active at any moment.
+  // Computed relative to `now` (not hardcoded dates) so re-seeding keeps
+  // the demo's "currently live" auctions actually current; there's no
+  // scheduler in this app to keep creating new slots between reseeds; see
+  // the `ArtworkAuction` schema comment.
+  const AUCTION_DURATION_DAYS = 35;
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const addDays = (date: Date, days: number) => new Date(date.getTime() + days * DAY_MS);
+
+  function designatedLaunchDates(monthsBack: number, monthsForward: number, now = new Date()): Date[] {
+    const dates: Date[] = [];
+    for (let offset = -monthsBack; offset <= monthsForward; offset++) {
+      const base = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + offset, 1, 9, 0, 0));
+      dates.push(base);
+      dates.push(new Date(Date.UTC(base.getUTCFullYear(), base.getUTCMonth(), 15, 9, 0, 0)));
+    }
+    return dates.sort((a, b) => a.getTime() - b.getTime());
+  }
+
+  const auctionNow = new Date();
+  const launchDates = designatedLaunchDates(3, 2, auctionNow);
+  const endedLaunches = launchDates.filter((d) => addDays(d, AUCTION_DURATION_DAYS) <= auctionNow);
+  // Every overlapping active launch, most recent last — there will always
+  // be at least two by the schedule's design (see comment above).
+  const activeLaunches = launchDates.filter(
+    (d) => d <= auctionNow && addDays(d, AUCTION_DURATION_DAYS) > auctionNow,
+  );
+  const futureLaunches = launchDates.filter((d) => d > auctionNow);
+  const [recentActiveLaunch, latestActiveLaunch] = activeLaunches.slice(-2);
+
+  const auctionSeeds: { artworkSlug: string; launch: Date; startingPriceMinor: bigint }[] = [
+    // Already ended — shows as "sold" on the timeline and artwork tiles.
+    { artworkSlug: "dusk-acacia", launch: endedLaunches[endedLaunches.length - 1], startingPriceMinor: 1200000n },
+    // The two currently overlapping active auctions.
+    { artworkSlug: "conductor-route-44", launch: recentActiveLaunch, startingPriceMinor: 6500000n },
+    { artworkSlug: "hollow", launch: latestActiveLaunch, startingPriceMinor: 2200000n },
+    // Next designated launch — shows as "scheduled".
+    { artworkSlug: "crossover", launch: futureLaunches[0], startingPriceMinor: 1800000n },
+  ];
+
+  for (const seed of auctionSeeds) {
+    const artwork = await prisma.artwork.findUniqueOrThrow({ where: { slug: seed.artworkSlug } });
+    const endsAt = addDays(seed.launch, AUCTION_DURATION_DAYS);
+    await prisma.artworkAuction.upsert({
+      where: { artworkId: artwork.id },
+      update: { startsAt: seed.launch, endsAt, startingPriceMinor: seed.startingPriceMinor, currency: "KES" },
+      create: {
+        artworkId: artwork.id,
+        startsAt: seed.launch,
+        endsAt,
+        startingPriceMinor: seed.startingPriceMinor,
+        currency: "KES",
+      },
+    });
+    // A piece under auction (at any stage) isn't sold at its fixed list
+    // price through the normal checkout — pull its stock so the two
+    // status badges never disagree.
+    await prisma.artworkVariant.updateMany({ where: { artworkId: artwork.id }, data: { stockQuantity: 0 } });
+  }
+
   // ArtCollect editorial event + the cross-platform link row (docs/08):
   // this is the one mapping table both codebases read. The CTA on
   // ArtCollect hands off to TikoYetu's own event page, which computes the
@@ -855,6 +918,55 @@ The cohort's first open-print day is planned as a public event — tickets on th
       });
     }
   }
+
+  // 404 Effect — Kutus entertainment company, real client (images in
+  // apps/artcollect-web/public/events/404-effect/, originals in
+  // img/404 effect/). Everything below is grounded in the two supplied
+  // event posters plus the organiser's own account: GENESIS, Friday
+  // 4th September at The Party Paris Lounge (Kutus–Kagio highway),
+  // DJ Nadia on the decks, resident MC Hype Amoh hosting, tickets
+  // KES 300, strictly 18+. The company's own track record (DJ Lyta,
+  // Wakadinali, DJ Nadia past bookings; bonfires, camp nights, road
+  // trips; residents MC Hype Amoh + DJ Selekta Skype) is stated in its
+  // description — all supplied by the client, none invented.
+  const effect404 = await prisma.organisation.upsert({
+    where: { slug: "404-effect" },
+    update: {},
+    create: {
+      name: "404 Effect",
+      slug: "404-effect",
+      type: "organiser",
+      verificationStatus: "verified",
+    },
+  });
+
+  await prisma.ticketingEvent.upsert({
+    where: { slug: "genesis-404-effect-paris-lounge" },
+    update: {},
+    create: {
+      slug: "genesis-404-effect-paris-lounge",
+      title: "Genesis — 404 Effect Friday Night",
+      description:
+        "404 Effect's Friday night lands at The Party Paris Lounge, on the Kutus–Kagio highway. Tonight is GENESIS: DJ Nadia on the decks, resident MC Hype Amoh on the mic. 404 Effect are Kutus's party architects — the crew behind the bonfires, camp nights, and road trips, and the nights that have brought DJ Lyta, Wakadinali, and DJ Nadia to town. Residents: MC Hype Amoh · DJ Selekta Skype. Strictly 18+ — drink responsibly. M-Pesa paybill 222111, account 76999 (The Party Paris).",
+      venue: "The Party Paris Lounge",
+      city: "Kutus",
+      timezone: "Africa/Nairobi",
+      startsAt: new Date("2026-09-04T21:00:00+03:00"),
+      endsAt: new Date("2026-09-05T03:00:00+03:00"),
+      coverImageKey: "/events/404-effect/genesis-tickets.jpeg",
+      currency: "KES",
+      status: "on_sale",
+      // nightlife → graffiti-styled event page (docs/11 style routing)
+      category: "nightlife",
+      organisationId: effect404.id,
+      tiers: {
+        create: [
+          // The poster's own price: "BUY TICKETS 300/=".
+          { name: "General", priceMinor: 30000n, currency: "KES", capacity: 300, minPerOrder: 1, maxPerOrder: 10 },
+        ],
+      },
+    },
+  });
 
   console.log("Seed complete.");
 }

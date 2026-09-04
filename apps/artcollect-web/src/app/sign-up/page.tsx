@@ -12,7 +12,9 @@ export default function SignUpPage() {
 
   return (
     <main className="relative z-10 mx-auto flex min-h-screen max-w-sm flex-col justify-center bg-[#17130f] px-6">
-      <Image src="/brand/monogram.png" alt="artcollect.co.ke" width={40} height={44} className="mb-6 h-10 w-auto" priority />
+      <Link href="/" className="mb-6 inline-flex w-fit items-center gap-2">
+        <Image src="/brand/monogram.png" alt="artcollect.co.ke" width={40} height={44} className="h-10 w-auto" priority />
+      </Link>
       <h1 className="font-serif text-3xl font-semibold text-zinc-50">Create an account</h1>
       <p className="mt-2 text-sm text-zinc-400">
         Save favourites, track enquiries, and manage your listings.

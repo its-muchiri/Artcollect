@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Annotation, StapleMark, TapePiece } from "@artcollect/ui";
+import { FloatingNavbar } from "@/components/ui/FloatingNavbar";
 import { Coverflow, type CoverflowItem } from "@/components/carousel/Coverflow";
 import { getPostBySlug, listPublishedPosts } from "@/lib/posts";
 import { parsePostBody } from "@/lib/post-format";
@@ -42,6 +43,7 @@ export default async function PostPage({
 
   return (
     <main className="min-h-screen bg-paper">
+      <FloatingNavbar />
       <article className="mx-auto w-full max-w-3xl px-[var(--ac-gutter)] pb-20 pt-24">
         <Link href="/journal" className="text-sm font-semibold text-cobalt hover:text-ink">
           ← The Journal

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Annotation } from "@artcollect/ui";
+import { FloatingNavbar } from "@/components/ui/FloatingNavbar";
 import { PartnersMarquee } from "@/components/sections/PartnersMarquee";
 import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
 import { Coverflow, type CoverflowItem } from "@/components/carousel/Coverflow";
@@ -34,6 +35,7 @@ export default async function JournalPage() {
 
   return (
     <main className="min-h-screen bg-paper">
+      <FloatingNavbar />
       <header className="border-b-2 border-ink">
         <div className="mx-auto w-full max-w-6xl px-[var(--ac-gutter)] pb-10 pt-24">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-cobalt">

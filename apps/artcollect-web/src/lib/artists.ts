@@ -54,7 +54,7 @@ export interface ArtistDetail extends ArtistCard {
 
 const PLACEHOLDER_PORTRAITS: Record<string, string> = {
   "wanjiku-mwangi":
-    "https://images.unsplash.com/photo-1531123897727-8f129e1684ce?auto=format&fit=crop&w=800&q=70",
+    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=70",
   // Ben's own photo (public/artists/ben-mungai/), not a stock placeholder —
   // kept in this map anyway since it's the same "slug -> portrait" lookup
   // every other artist uses; nothing else needs to change once a real

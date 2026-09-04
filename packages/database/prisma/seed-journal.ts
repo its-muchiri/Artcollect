@@ -65,7 +65,7 @@ const COVERS = [
   "/artists/ben-mungai/bloom.jpeg",
   "https://images.unsplash.com/photo-1531913764164-f85c52e6e654?auto=format&fit=crop&w=1200&q=80",
   "/artists/ben-mungai/transmission.jpeg",
-  "https://images.unsplash.com/photo-1569172122301-bc5008bc09c5?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=1200&q=80",
   "/artists/ben-mungai/dusk-acacia.jpeg",
   "https://images.unsplash.com/photo-1549289524-06cf8837ace5?auto=format&fit=crop&w=1200&q=80",
   "/artists/ben-mungai/hollow.jpeg",

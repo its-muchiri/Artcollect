@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { Anton, Caveat, Inter } from "next/font/google";
+import { PageNavCluster } from "@/components/ui/PageNavCluster";
 import "./globals.css";
 
 /*
@@ -126,6 +127,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
         {children}
+        <PageNavCluster />
       </body>
     </html>
   );

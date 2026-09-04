@@ -27,13 +27,13 @@ export async function initiateDonationAction(input: {
   message?: string;
   anonymous?: boolean;
 }): Promise<{ error?: string } | undefined> {
-  const validationError = validateDonationInput(input);
-  if (validationError) return { error: validationError };
-
   const cause = await prisma.donationCause.findUnique({ where: { id: input.causeId } });
   if (!cause || cause.status !== "published") {
     return { error: "This cause is not currently accepting donations." };
   }
+
+  const validationError = validateDonationInput({ ...input, currency: cause.currency });
+  if (validationError) return { error: validationError };
 
   const donation = await prisma.donation.create({
     data: {

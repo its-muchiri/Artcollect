@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import type { initiateDonationAction } from "@/lib/actions/donation-actions";
+import { donationBounds } from "@/lib/donation-validation";
 import { formatKes } from "@/lib/format";
 
 export interface DonationFormProps {
@@ -12,10 +13,6 @@ export interface DonationFormProps {
   action: typeof initiateDonationAction;
 }
 
-/** Preset gift amounts in minor units (KES presets for Kenyan causes). */
-const PRESETS_MINOR = [10_000, 25_000, 50_000, 100_000] as const; // KES 100/250/500/1000
-const CUSTOM_MIN = 1000; // KES 10
-
 /**
  * The donate form (docs/11 Phase 5 rules apply — this is a checkout-
  * adjacent surface: calm, Inter-set, vector icons only; the eslint
@@ -23,7 +20,13 @@ const CUSTOM_MIN = 1000; // KES 10
  * Server-side validation re-checks everything; nothing here is trusted.
  */
 export function DonationForm({ causeId, causeTitle, currency, action }: DonationFormProps) {
-  const [amountMinor, setAmountMinor] = useState<number>(PRESETS_MINOR[0]);
+  const bounds = useMemo(() => donationBounds(currency), [currency]);
+  // Four round presets scaling off this currency's minimum (KES 500 → 500/1,000/2,500/5,000; $5 → $5/$10/$25/$50).
+  const presetsMinor = useMemo(
+    () => [bounds.min, bounds.min * 2, bounds.min * 5, bounds.min * 10],
+    [bounds],
+  );
+  const [amountMinor, setAmountMinor] = useState<number>(presetsMinor[0]!);
   const [customValue, setCustomValue] = useState("");
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -66,7 +69,7 @@ export function DonationForm({ causeId, causeTitle, currency, action }: Donation
       <fieldset className="mt-4">
         <legend className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Choose an amount</legend>
         <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {PRESETS_MINOR.map((preset) => {
+          {presetsMinor.map((preset) => {
             const selected = customValue.trim() === "" && amountMinor === preset;
             return (
               <button
@@ -95,13 +98,17 @@ export function DonationForm({ causeId, causeTitle, currency, action }: Donation
           id="custom-amount"
           type="number"
           inputMode="decimal"
-          min={CUSTOM_MIN / 100}
+          min={bounds.min / 100}
+          max={bounds.max / 100}
           step="1"
-          placeholder="e.g. 250"
+          placeholder={`e.g. ${bounds.min / 100 + bounds.min / 100}`}
           value={customValue}
           onChange={(e) => setCustomValue(e.target.value)}
           className="mt-1 w-full rounded-lg border border-zinc-200 dark:border-zinc-800 px-3 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 outline-none focus:border-emerald-500"
         />
+        <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
+          {formatKes(bounds.min, currency)} – {formatKes(bounds.max, currency)}
+        </p>
       </fieldset>
 
       <div className="mt-4 space-y-3">
@@ -158,7 +165,7 @@ export function DonationForm({ causeId, causeTitle, currency, action }: Donation
 
       <button
         type="submit"
-        disabled={effectiveAmountMinor < CUSTOM_MIN || !email || isPending}
+        disabled={effectiveAmountMinor < bounds.min || effectiveAmountMinor > bounds.max || !email || isPending}
         className="mt-4 w-full rounded-full bg-emerald-600 py-3 text-sm font-semibold text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-400 dark:text-zinc-500 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-600 dark:text-zinc-400"
       >
         {isPending

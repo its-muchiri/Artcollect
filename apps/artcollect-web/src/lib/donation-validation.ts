@@ -7,9 +7,17 @@
  * live here.
  */
 
-/** Donations are intentionally bounded: tiny spam and absurd amounts both rejected. */
-export const MIN_DONATION_MINOR = 1000; // KES 10
-export const MAX_DONATION_MINOR = 10_000_000; // KES 100,000
+/**
+ * Donations are intentionally bounded: tiny spam and absurd amounts both
+ * rejected. Bounds are currency-aware — KES and USD are the two
+ * currencies any cause on this platform is actually seeded in.
+ */
+export const DONATION_BOUNDS_MINOR: Record<string, { min: number; max: number }> = {
+  KES: { min: 50_000, max: 10_000_000 }, // KES 500 – 100,000
+  USD: { min: 500, max: 1_000_000 }, // $5 – $10,000
+};
+const DEFAULT_BOUNDS = DONATION_BOUNDS_MINOR.KES!;
+
 export const MAX_MESSAGE_LENGTH = 280;
 export const MAX_NAME_LENGTH = 80;
 
@@ -19,18 +27,27 @@ export interface DonationInput {
   causeId: string;
   /** Minor units (cents). */
   amountMinor: number;
+  /** ISO currency of the cause being donated to — governs which bound applies. */
+  currency?: string;
   donorEmail: string;
   donorName?: string;
   message?: string;
   anonymous?: boolean;
 }
 
+export function donationBounds(currency: string | undefined): { min: number; max: number } {
+  return DONATION_BOUNDS_MINOR[(currency ?? "KES").toUpperCase()] ?? DEFAULT_BOUNDS;
+}
+
 export function validateDonationInput(input: DonationInput): string | null {
-  if (!Number.isInteger(input.amountMinor) || input.amountMinor < MIN_DONATION_MINOR) {
-    return `The smallest donation is KES ${MIN_DONATION_MINOR / 100}.`;
+  const bounds = donationBounds(input.currency);
+  const currency = (input.currency ?? "KES").toUpperCase();
+
+  if (!Number.isInteger(input.amountMinor) || input.amountMinor < bounds.min) {
+    return `The smallest donation is ${currency} ${bounds.min / 100}.`;
   }
-  if (input.amountMinor > MAX_DONATION_MINOR) {
-    return `For gifts above KES ${MAX_DONATION_MINOR / 100}, please email us directly so we can receipt it properly.`;
+  if (input.amountMinor > bounds.max) {
+    return `For gifts above ${currency} ${bounds.max / 100}, please email us directly so we can receipt it properly.`;
   }
   if (!EMAIL_PATTERN.test(input.donorEmail)) {
     return "Enter a valid email so we can send your receipt.";

@@ -1,0 +1,70 @@
+@import "tailwindcss";
+/* Direct relative import: Tailwind's package-specifier resolution can't
+   follow the npm-workspaces symlink on this setup, and the file is part
+   of this repo anyway. */
+@import "../../../../packages/ui/tokens.css";
+
+/* Scan the shared @artcollect/ui package's source so utilities used only
+   inside it (scrap components, Annotation) get generated for this app. */
+@source "../../../../packages/ui/src";
+
+/*
+ * The v2 maximalist system (docs/11): one neutral canvas (paper/ink) plus
+ * the five style-lane accents, mapped from @artcollect/ui's --ac-* custom
+ * properties into Tailwind utilities (bg-paper, text-ink, border-coral,
+ * …). Fonts route through the variables next/font/google injects on <html>
+ * (see layout.tsx).
+ */
+@theme {
+  --font-display: var(--font-anton), "Arial Narrow", Impact, sans-serif;
+  /* Alias kept for the ticketing section's graffiti components, which
+     reference `font-poster` specifically — same face as `font-display`
+     under the unified v2 system, just a more semantic name in that
+     context. */
+  --font-poster: var(--font-anton), "Arial Narrow", Impact, sans-serif;
+  --font-hand: var(--font-caveat), "Segoe Script", cursive;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --color-paper: var(--ac-paper);
+  --color-paper-deep: var(--ac-paper-deep);
+  --color-ink: var(--ac-ink);
+  --color-coral: var(--ac-coral);
+  --color-cobalt: var(--ac-cobalt);
+  --color-lime: var(--ac-lime);
+  --color-hot-pink: var(--ac-hot-pink);
+  --color-marker: var(--ac-marker);
+  --color-highlighter: var(--ac-highlighter);
+  --color-sticker-pink: var(--ac-sticker-pink);
+}
+
+/*
+ * Lenis' own recommended base styles.
+ * Lenis toggles these classes on <html> itself:
+ *  - `.lenis` is present whenever Lenis is active.
+ *  - `.lenis-smooth` forces `scroll-behavior: auto`, overriding any CSS
+ *    `scroll-behavior: smooth` that would otherwise double up with Lenis's
+ *    own easing and fight it every frame.
+ *  - `.lenis-stopped` / `.lenis-scrolling` are available for state-based
+ *    styling hooks if a component ever needs them.
+ */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  background-color: var(--ac-paper);
+  color: var(--ac-ink);
+}

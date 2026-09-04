@@ -1,0 +1,856 @@
+// ArtCollect & TikoYetu — shared data model.
+//
+// docs/03_database_schema.md calls for `artcollect` and `tikoyetu` living in
+// separately-privileged Postgres schemas. That separation is a deployment
+// detail (connection roles / GRANTs), not something this Prisma schema
+// needs to encode to start — everything below lives in the default
+// `public` schema for now, grouped by comment header in the same order the
+// spec document uses. Split into `@@schema(...)` blocks (Prisma's
+// `multiSchema` feature) once there's an actual access-control reason to.
+//
+// Money is always `BigInt amountMinor` + `String currency @db.Char(3)` —
+// integer minor units, never floating point, per docs/03.
+
+// Prisma 7 dropped the bundled Rust query engine: connections now go
+// through a JS driver adapter passed to `new PrismaClient({ adapter })` in
+// application code (see index.ts), and the connection string used by the
+// CLI (migrate/studio/db pull) lives in prisma.config.ts, not here — a bare
+// `url = env(...)` in this block is a hard validation error in 7.x.
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Core identity (shared across both platforms)
+// ---------------------------------------------------------------------------
+
+enum UserStatus {
+  active
+  suspended
+  deleted
+}
+
+enum UserRole {
+  visitor
+  buyer
+  artist
+  curator
+  organiser
+  validator
+  support
+  moderator
+  admin
+}
+
+model User {
+  id           String     @id @default(uuid())
+  email        String     @unique
+  phoneE164    String?    @map("phone_e164")
+  name         String?
+  /// bcrypt hash. Null for accounts that only ever sign in via a future
+  /// OAuth provider — credentials sign-in is simply unavailable for them.
+  passwordHash String?    @map("password_hash")
+  status       UserStatus @default(active)
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+  deletedAt    DateTime?  @map("deleted_at")
+
+  roles                   UserRoleAssignment[]
+  sessions                Session[]
+  organisationMemberships OrganisationMember[]
+  artistProfile           ArtistProfile?
+  artInquiries            ArtInquiry[]
+  validatedScans          TicketScan[]          @relation("ScanValidator")
+
+  @@map("users")
+}
+
+model UserRoleAssignment {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  role      UserRole
+  scopeType String?  @map("scope_type") // e.g. "organisation" | "event"
+  scopeId   String?  @map("scope_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, role, scopeType, scopeId])
+  @@map("user_roles")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  ipHash    String?  @map("ip_hash")
+  userAgent String?  @map("user_agent")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+enum OrganisationType {
+  gallery
+  organiser
+  business
+}
+
+enum VerificationStatus {
+  unverified
+  pending
+  verified
+  rejected
+}
+
+model Organisation {
+  id                 String              @id @default(uuid())
+  name               String
+  slug                String              @unique
+  type               OrganisationType
+  verificationStatus VerificationStatus  @default(unverified) @map("verification_status")
+  createdAt          DateTime            @default(now()) @map("created_at")
+  updatedAt          DateTime            @updatedAt @map("updated_at")
+
+  members         OrganisationMember[]
+  events          Event[]
+  ticketingEvents TicketingEvent[]
+
+  @@map("organisations")
+}
+
+enum OrganisationMemberRole {
+  owner
+  admin
+  editor
+  validator
+}
+
+enum OrganisationMemberStatus {
+  invited
+  active
+  removed
+}
+
+model OrganisationMember {
+  id             String                   @id @default(uuid())
+  organisationId String                   @map("organisation_id")
+  userId         String                   @map("user_id")
+  role           OrganisationMemberRole
+  status         OrganisationMemberStatus @default(invited)
+  createdAt      DateTime                 @default(now()) @map("created_at")
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organisationId, userId])
+  @@map("organisation_members")
+}
+
+model ApiToken {
+  id         String    @id @default(uuid())
+  ownerType  String    @map("owner_type")
+  tokenHash  String    @unique @map("token_hash")
+  scopes     String[]
+  expiresAt  DateTime? @map("expires_at")
+  lastUsedAt DateTime? @map("last_used_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  @@map("api_tokens")
+}
+
+// ---------------------------------------------------------------------------
+// ArtCollect: content & commerce
+// ---------------------------------------------------------------------------
+
+enum ProfileVisibility {
+  draft
+  published
+  hidden
+}
+
+model ArtistProfile {
+  id         String            @id @default(uuid())
+  userId     String            @unique @map("user_id")
+  slug       String            @unique
+  /// One-sentence, 10-15 word summary of the practice (the profile header
+  /// tagline). Optional: artists without one just don't show a tagline
+  /// rather than getting a placeholder invented for them.
+  tagline    String?
+  bio        String?
+  location   String?
+  websiteUrl String?           @map("website_url")
+  visibility ProfileVisibility @default(draft)
+  createdAt  DateTime          @default(now()) @map("created_at")
+  updatedAt  DateTime          @updatedAt @map("updated_at")
+
+  user           User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  artworks       Artwork[]
+  disciplines    ArtistDiscipline[]
+  timeline       ArtistTimelineEntry[]
+  collaborations ArtistCollaboration[]
+
+  @@map("artist_profiles")
+}
+
+enum ArtistDisciplineTier {
+  primary
+  secondary
+}
+
+/// A practiced discipline/medium, shown as a badge under the artist's name
+/// and (optionally) with its own short description further down the page.
+/// Deliberately NOT an enum of fixed values — artists' practices don't fit
+/// a fixed taxonomy, and forcing one would mean either an ever-growing enum
+/// or artists mis-tagged into the closest available option.
+model ArtistDiscipline {
+  id          String               @id @default(uuid())
+  artistId    String               @map("artist_id")
+  name        String
+  /// A single emoji, shown next to the discipline's own description
+  /// section. Null is fine — not every discipline needs one.
+  emoji       String?
+  tier        ArtistDisciplineTier
+  description String?
+  sortOrder   Int                  @default(0) @map("sort_order")
+
+  artist ArtistProfile @relation(fields: [artistId], references: [id], onDelete: Cascade)
+
+  @@index([artistId])
+  @@map("artist_disciplines")
+}
+
+/// One reverse-chronological career milestone. `year` is a plain Int (not
+/// a full date) because that's the actual precision most of these claims
+/// are ever known/stated to — forcing a full DateTime would invite made-up
+/// month/day precision no one actually verified.
+model ArtistTimelineEntry {
+  id          String @id @default(uuid())
+  artistId    String @map("artist_id")
+  year        Int
+  title       String
+  description String
+  sortOrder   Int    @default(0) @map("sort_order")
+
+  artist ArtistProfile @relation(fields: [artistId], references: [id], onDelete: Cascade)
+
+  @@index([artistId])
+  @@map("artist_timeline_entries")
+}
+
+/// A current or notable collaboration/project — platform features,
+/// cross-disciplinary projects, mentorship programs, etc.
+model ArtistCollaboration {
+  id          String @id @default(uuid())
+  artistId    String @map("artist_id")
+  title       String
+  description String
+  sortOrder   Int    @default(0) @map("sort_order")
+
+  artist ArtistProfile @relation(fields: [artistId], references: [id], onDelete: Cascade)
+
+  @@index([artistId])
+  @@map("artist_collaborations")
+}
+
+enum ArtworkStatus {
+  draft
+  submitted
+  published
+  reserved
+  sold
+  archived
+}
+
+model Artwork {
+  id          String        @id @default(uuid())
+  artistId    String        @map("artist_id")
+  title       String
+  slug        String        @unique
+  medium      String?
+  yearCreated Int?          @map("year_created")
+  description String?
+  status      ArtworkStatus @default(draft)
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  deletedAt   DateTime?     @map("deleted_at")
+
+  artist          ArtistProfile    @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  variants        ArtworkVariant[]
+  media           ArtworkMedia[]
+  inquiries       ArtInquiry[]
+  orderItems      ArtOrderItem[]
+  collectionItems CollectionItem[]
+
+  @@index([status])
+  @@map("artworks")
+}
+
+enum ArtworkVariantType {
+  original
+  limited_edition
+  open_edition
+  print
+  digital
+}
+
+model ArtworkVariant {
+  id            String             @id @default(uuid())
+  artworkId     String             @map("artwork_id")
+  type          ArtworkVariantType
+  priceMinor    BigInt             @map("price_minor")
+  currency      String             @db.Char(3)
+  stockQuantity Int                @default(0) @map("stock_quantity")
+  editionSize   Int?               @map("edition_size")
+  createdAt     DateTime           @default(now()) @map("created_at")
+
+  artwork    Artwork        @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+  orderItems ArtOrderItem[]
+
+  @@index([artworkId])
+  @@map("artwork_variants")
+}
+
+model ArtworkMedia {
+  id         String  @id @default(uuid())
+  artworkId  String  @map("artwork_id")
+  storageKey String  @map("storage_key")
+  altText    String? @map("alt_text")
+  width      Int?
+  height     Int?
+  sortOrder  Int     @default(0) @map("sort_order")
+
+  artwork Artwork @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+
+  @@index([artworkId])
+  @@map("artwork_media")
+}
+
+model Collection {
+  id             String   @id @default(uuid())
+  organisationId String?  @map("organisation_id")
+  slug           String   @unique
+  title          String
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  items CollectionItem[]
+
+  @@map("collections")
+}
+
+model CollectionItem {
+  id           String @id @default(uuid())
+  collectionId String @map("collection_id")
+  artworkId    String @map("artwork_id")
+  sortOrder    Int    @default(0) @map("sort_order")
+
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  artwork    Artwork    @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+
+  @@unique([collectionId, artworkId])
+  @@map("collection_items")
+}
+
+enum InquiryStatus {
+  open
+  in_progress
+  responded
+  closed
+}
+
+model ArtInquiry {
+  id         String        @id @default(uuid())
+  artworkId  String?       @map("artwork_id")
+  userId     String?       @map("user_id")
+  name       String
+  email      String
+  message    String
+  status     InquiryStatus @default(open)
+  assigneeId String?       @map("assignee_id")
+  createdAt  DateTime      @default(now()) @map("created_at")
+
+  artwork Artwork? @relation(fields: [artworkId], references: [id], onDelete: SetNull)
+  user    User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@map("art_inquiries")
+}
+
+enum ArtOrderStatus {
+  pending_payment
+  paid
+  payment_failed
+  expired
+  partially_refunded
+  refunded
+  cancelled
+}
+
+model ArtOrder {
+  id         String         @id @default(uuid())
+  buyerEmail String         @map("buyer_email")
+  buyerName  String?        @map("buyer_name")
+  userId     String?        @map("user_id")
+  status     ArtOrderStatus @default(pending_payment)
+  totalMinor BigInt         @map("total_minor")
+  currency   String         @db.Char(3)
+  createdAt  DateTime       @default(now()) @map("created_at")
+  updatedAt  DateTime       @updatedAt @map("updated_at")
+
+  items ArtOrderItem[]
+
+  @@index([status])
+  @@map("art_orders")
+}
+
+model ArtOrderItem {
+  id                 String @id @default(uuid())
+  orderId            String @map("order_id")
+  artworkId          String @map("artwork_id")
+  variantId          String @map("variant_id")
+  titleSnapshot      String @map("title_snapshot")
+  artistSnapshot     String @map("artist_snapshot")
+  priceMinorSnapshot BigInt @map("price_minor_snapshot")
+  quantity           Int    @default(1)
+
+  order   ArtOrder       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  artwork Artwork        @relation(fields: [artworkId], references: [id])
+  variant ArtworkVariant @relation(fields: [variantId], references: [id])
+
+  @@map("art_order_items")
+}
+
+// ---------------------------------------------------------------------------
+// ArtCollect: event editorial
+// ---------------------------------------------------------------------------
+
+enum EventLifecycleStatus {
+  draft
+  submitted
+  approved
+  published
+  ticketing_active
+  closed
+  cancelled
+  archived
+}
+
+model Event {
+  id             String               @id @default(uuid())
+  organisationId String?              @map("organisation_id")
+  title          String
+  slug           String               @unique
+  venue          String?
+  startsAt       DateTime?            @map("starts_at")
+  endsAt         DateTime?            @map("ends_at")
+  coverImageKey  String?              @map("cover_image_key")
+  status         EventLifecycleStatus @default(draft)
+  createdAt      DateTime             @default(now()) @map("created_at")
+  updatedAt      DateTime             @updatedAt @map("updated_at")
+
+  organisation  Organisation?        @relation(fields: [organisationId], references: [id], onDelete: SetNull)
+  ticketingLink TicketingEventLink?
+
+  @@index([status])
+  @@map("events")
+}
+
+/// Shared contract row: maps one ArtCollect Event to its canonical TikoYetu
+/// TicketingEvent. Per docs/08_cross_platform_integration.md this mapping
+/// table — never title/date matching — is the only integration key between
+/// the two platforms, and it is the one table both codebases are expected
+/// to read.
+model TicketingEventLink {
+  id                String    @id @default(uuid())
+  artcollectEventId String    @unique @map("artcollect_event_id")
+  ticketingEventId  String    @unique @map("ticketing_event_id")
+  checkoutUrl       String    @map("checkout_url")
+  syncState         String    @default("pending") @map("sync_state")
+  lastSyncedAt      DateTime? @map("last_synced_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+
+  event          Event          @relation(fields: [artcollectEventId], references: [id], onDelete: Cascade)
+  ticketingEvent TicketingEvent @relation(fields: [ticketingEventId], references: [id], onDelete: Cascade)
+
+  @@map("ticketing_event_links")
+}
+
+// ---------------------------------------------------------------------------
+// TikoYetu: ticketing & payments
+// ---------------------------------------------------------------------------
+
+enum TicketingEventStatus {
+  draft
+  ready
+  on_sale
+  sales_paused
+  sold_out
+  ended
+  cancelled
+  archived
+}
+
+/// Coarse content genre of a TikoYetu event. Drives per-event visual
+/// styling on the event page (docs/11_maximalist_redesign_plan.md):
+/// streetart/music/nightlife events get the graffiti treatment (code-split
+/// to those pages only); art/editorial/other keep the calm default surface.
+/// The `event-style.ts` mapping and its test mirror this enum exactly.
+enum TicketingEventCategory {
+  art
+  music
+  nightlife
+  streetart
+  editorial
+  other
+}
+
+model TicketingEvent {
+  id             String               @id @default(uuid())
+  organisationId String               @map("organisation_id")
+  /// Public identifier for TikoYetu's own event page
+  /// (`tikoyetu.co.ke/events/{slug}`) — populated whether the event
+  /// arrived via an ArtCollect link or was created directly in TikoYetu.
+  slug           String               @unique
+  title          String
+  description    String?
+  venue          String
+  city           String?
+  timezone       String
+  startsAt       DateTime?            @map("starts_at")
+  endsAt         DateTime?            @map("ends_at")
+  coverImageKey  String?              @map("cover_image_key")
+  salesStartAt   DateTime?            @map("sales_start_at")
+  salesEndAt     DateTime?            @map("sales_end_at")
+  currency       String               @db.Char(3)
+  status         TicketingEventStatus @default(draft)
+  category       TicketingEventCategory @default(other)
+  termsUrl       String?              @map("terms_url")
+  createdAt      DateTime             @default(now()) @map("created_at")
+  updatedAt      DateTime             @updatedAt @map("updated_at")
+
+  organisation Organisation        @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+  link         TicketingEventLink?
+  tiers        TicketTier[]
+  orders       Order[]
+  tickets      Ticket[]
+
+  @@index([status])
+  @@map("ticketing_events")
+}
+
+model TicketTier {
+  id          String   @id @default(uuid())
+  eventId     String   @map("event_id")
+  name        String
+  priceMinor  BigInt   @map("price_minor")
+  currency    String   @db.Char(3)
+  capacity    Int
+  minPerOrder Int      @default(1) @map("min_per_order")
+  maxPerOrder Int      @default(10) @map("max_per_order")
+  visible     Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  event      TicketingEvent  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  holds      InventoryHold[]
+  orderItems OrderItem[]
+  tickets    Ticket[]
+
+  @@index([eventId])
+  @@map("ticket_tiers")
+}
+
+/// Short-lived checkout reservation. Availability for a tier is always
+/// `capacity - (issued tickets) - (sum of active, non-expired holds)`,
+/// computed at read time — never trust a client-supplied count.
+model InventoryHold {
+  id        String   @id @default(uuid())
+  tierId    String   @map("tier_id")
+  /// Null briefly between hold creation and order creation within the same
+  /// checkout transaction; every hold is tied to an order once that
+  /// transaction commits, so a paid/cancelled/expired order can release
+  /// exactly its own holds.
+  orderId   String?  @map("order_id")
+  quantity  Int
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  tier  TicketTier @relation(fields: [tierId], references: [id], onDelete: Cascade)
+  order Order?     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([tierId, expiresAt])
+  @@index([orderId])
+  @@map("inventory_holds")
+}
+
+enum OrderStatus {
+  pending_payment
+  paid
+  payment_failed
+  expired
+  partially_refunded
+  refunded
+  cancelled
+}
+
+model Order {
+  id         String      @id @default(uuid())
+  eventId    String      @map("event_id")
+  buyerEmail String      @map("buyer_email")
+  buyerName  String?     @map("buyer_name")
+  userId     String?     @map("user_id")
+  status     OrderStatus @default(pending_payment)
+  totalMinor BigInt      @map("total_minor")
+  currency   String      @db.Char(3)
+  createdAt  DateTime    @default(now()) @map("created_at")
+  updatedAt  DateTime    @updatedAt @map("updated_at")
+
+  event    TicketingEvent  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  items    OrderItem[]
+  payments Payment[]
+  tickets  Ticket[]
+  refunds  Refund[]
+  holds    InventoryHold[]
+
+  @@index([status])
+  @@map("orders")
+}
+
+model OrderItem {
+  id                 String @id @default(uuid())
+  orderId            String @map("order_id")
+  tierId             String @map("tier_id")
+  tierNameSnapshot   String @map("tier_name_snapshot")
+  priceMinorSnapshot BigInt @map("price_minor_snapshot")
+  quantity           Int
+
+  order Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  tier  TicketTier @relation(fields: [tierId], references: [id])
+
+  @@map("order_items")
+}
+
+enum PaymentProvider {
+  mpesa
+  card
+}
+
+enum PaymentStatus {
+  pending
+  succeeded
+  failed
+  refunded
+  partially_refunded
+}
+
+/// Payment status only ever transitions on a verified provider webhook —
+/// never on a client redirect/success URL. `webhookEventId` is unique so
+/// webhook processing is idempotent under provider retries.
+model Payment {
+  id             String          @id @default(uuid())
+  orderId        String          @map("order_id")
+  provider       PaymentProvider
+  providerRef    String          @unique @map("provider_ref")
+  status         PaymentStatus   @default(pending)
+  amountMinor    BigInt          @map("amount_minor")
+  currency       String          @db.Char(3)
+  webhookEventId String?         @unique @map("webhook_event_id")
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
+
+  order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  refunds Refund[]
+
+  @@index([status])
+  @@map("payments")
+}
+
+enum TicketStatus {
+  active
+  transferred
+  voided
+  checked_in
+  expired
+}
+
+/// One row per admission entitlement (never one row per order). `qrTokenHash`
+/// is the only thing encoded in the QR payload — opaque and non-sequential,
+/// per docs/07_payments_and_security.md.
+model Ticket {
+  id           String       @id @default(uuid())
+  orderId      String       @map("order_id")
+  eventId      String       @map("event_id")
+  tierId       String       @map("tier_id")
+  qrTokenHash  String       @unique @map("qr_token_hash")
+  status       TicketStatus @default(active)
+  attendeeName String?      @map("attendee_name")
+  createdAt    DateTime     @default(now()) @map("created_at")
+
+  order Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  event TicketingEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  tier  TicketTier     @relation(fields: [tierId], references: [id])
+  scans TicketScan[]
+
+  @@index([eventId, status])
+  @@map("tickets")
+}
+
+enum ScanResult {
+  valid
+  already_used
+  invalid
+  voided
+  wrong_event
+  expired
+}
+
+model TicketScan {
+  id          String     @id @default(uuid())
+  ticketId    String     @map("ticket_id")
+  validatorId String?    @map("validator_id")
+  result      ScanResult
+  device      String?
+  gate        String?
+  scannedAt   DateTime   @default(now()) @map("scanned_at")
+
+  ticket    Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  validator User?  @relation("ScanValidator", fields: [validatorId], references: [id], onDelete: SetNull)
+
+  @@index([ticketId])
+  @@map("ticket_scans")
+}
+
+enum RefundStatus {
+  pending
+  succeeded
+  failed
+}
+
+model Refund {
+  id          String       @id @default(uuid())
+  paymentId   String       @map("payment_id")
+  orderId     String       @map("order_id")
+  amountMinor BigInt       @map("amount_minor")
+  reason      String?
+  providerRef String?      @map("provider_ref")
+  status      RefundStatus @default(pending)
+  createdAt   DateTime     @default(now()) @map("created_at")
+
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("refunds")
+}
+
+// ---------------------------------------------------------------------------
+// ArtCollect: journal (editorial blog)
+// ---------------------------------------------------------------------------
+
+enum PostStatus {
+  draft
+  published
+  archived
+}
+
+/// Editorial journal entries — studio visits, scene writing, cause stories.
+/// ArtCollect is the editorial platform (docs/01); this content never
+/// leaves it. Body is plain text with lightweight conventions the
+/// renderer understands: blank-line-separated paragraphs, "## " headings,
+/// "> " blockquotes.
+model Post {
+  id            String     @id @default(uuid())
+  slug          String     @unique
+  title         String
+  excerpt       String?
+  body          String
+  coverImageKey String?    @map("cover_image_key")
+  /// Editorial byline (the name as printed), not a User relation —
+  /// guest/scene writers don't have accounts.
+  authorName    String     @map("author_name")
+  tags          String[]
+  status        PostStatus @default(draft)
+  publishedAt   DateTime?  @map("published_at")
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+
+  @@map("posts")
+}
+
+// ---------------------------------------------------------------------------
+// TikoYetu: donations for art causes
+// ---------------------------------------------------------------------------
+
+enum DonationCauseStatus {
+  draft
+  published
+  closed
+}
+
+/// A fundraising cause for African art programs — community murals,
+/// print workshops, materials funds. Content lives in the shared schema;
+/// discovery is editorial (ArtCollect reads these rows for its causes
+/// page) while the payment itself is TikoYetu's, reusing the exact
+/// Flutterwave verify-then-finalize machinery as ticket orders.
+model DonationCause {
+  id            String              @id @default(uuid())
+  slug          String              @unique
+  title         String
+  summary       String
+  story         String
+  country       String?
+  organiserName String              @map("organiser_name")
+  goalMinor     BigInt              @map("goal_minor")
+  currency      String              @db.Char(3)
+  coverImageKey String?             @map("cover_image_key")
+  status        DonationCauseStatus @default(draft)
+  createdAt     DateTime            @default(now()) @map("created_at")
+  updatedAt     DateTime            @updatedAt @map("updated_at")
+
+  donations Donation[]
+
+  @@map("donation_causes")
+}
+
+enum DonationStatus {
+  pending
+  succeeded
+  failed
+  refunded
+}
+
+/// One row per donation attempt. The row is created `pending` when the
+/// donor starts checkout and only ever transitions on a verified
+/// provider call — the same rule as orders (docs/07). `providerRef` and
+/// `webhookEventId` are unique so webhook retries and the return page
+/// racing each other finalize exactly once; the final transition is a
+/// conditional `updateMany … where status: "pending"` so only one caller
+/// can win regardless of ordering.
+model Donation {
+  id             String         @id @default(uuid())
+  causeId        String         @map("cause_id")
+  donorEmail     String         @map("donor_email")
+  donorName      String?        @map("donor_name")
+  /// A short public message of support, shown on the cause page (unless
+  /// the donation is anonymous, in which case even the name is hidden).
+  message        String?
+  anonymous      Boolean        @default(false)
+  amountMinor    BigInt         @map("amount_minor")
+  currency       String         @db.Char(3)
+  status         DonationStatus @default(pending)
+  providerRef    String?        @unique @map("provider_ref")
+  webhookEventId String?        @unique @map("webhook_event_id")
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+
+  cause DonationCause @relation(fields: [causeId], references: [id], onDelete: Cascade)
+
+  @@index([causeId, status])
+  @@map("donations")
+}

@@ -1,0 +1,56 @@
+/*
+ * ArtCollect & TikoYetu — v2 maximalist design tokens.
+ *
+ * Imported by both apps' globals.css. Values mirror packages/ui/src/tokens.ts
+ * (the TS source of truth used by tests and component defaults) — swap a
+ * color here AND there to re-theme; that's the "one-line-swappable" rule.
+ *
+ * Everything is a CSS custom property on :root so any component — app code
+ * or @artcollect/ui — can consume the system without importing anything.
+ */
+
+:root {
+  /* Neutrals: the one canvas and the one ink. */
+  --ac-paper: #f5f1e8;
+  --ac-ink: #161311;
+
+  /* The five accents — one per style lane. */
+  --ac-coral: #e8442e; /* collage */
+  --ac-cobalt: #1f4fd8; /* vector */
+  --ac-lime: #a4c639; /* pixel */
+  --ac-hot-pink: #e93a8f; /* graffiti */
+  --ac-marker: #b23a2e; /* handwritten */
+
+  /* Derived supporting tints (backings/fills, not new accents). */
+  --ac-paper-deep: #eae2d0;
+  --ac-highlighter: #f2df4f;
+  --ac-sticker-pink: #f5c6d6;
+
+  /*
+   * Spacing & grid scale. The whole v2 system runs on one 4px-based scale
+   * with one clamp-driven gutter — the "one grid" that unifies the five
+   * styles.
+   */
+  --ac-space-1: 0.25rem; /* 4px */
+  --ac-space-2: 0.5rem; /* 8px */
+  --ac-space-3: 0.75rem; /* 12px */
+  --ac-space-4: 1rem; /* 16px */
+  --ac-space-6: 1.5rem; /* 24px */
+  --ac-space-8: 2rem; /* 32px */
+  --ac-space-12: 3rem; /* 48px */
+  --ac-space-16: 4rem; /* 64px */
+  --ac-space-24: 6rem; /* 96px */
+  --ac-gutter: clamp(1rem, 4vw, 2.5rem);
+  --ac-measure: 64ch; /* one readable measure for body copy */
+  --ac-content-max: 72rem;
+
+  /* Scrap/collage geometry: paper is sharp-edged; tape and stickers round. */
+  --ac-radius-scrap: 0.125rem;
+  --ac-radius-sticker: 0.75rem;
+
+  /* Motion: one duration scale; scroll effects must only ever use
+     transform/opacity (see docs/11 non-negotiables). */
+  --ac-motion-fast: 160ms;
+  --ac-motion-base: 320ms;
+  --ac-motion-slow: 640ms;
+}

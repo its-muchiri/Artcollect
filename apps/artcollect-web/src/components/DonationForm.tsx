@@ -80,7 +80,7 @@ export function DonationForm({ causeId, causeTitle, currency, action }: Donation
                   setCustomValue("");
                   setAmountMinor(preset);
                 }}
-                className={`rounded-full border px-3 py-2 text-sm font-semibold transition-colors ${
+                className={`rounded-full border px-3 py-2 text-sm font-semibold transition-colors active:scale-95 ${
                   selected
                     ? "border-emerald-600 bg-emerald-50 text-emerald-700"
                     : "border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800"
@@ -166,7 +166,7 @@ export function DonationForm({ causeId, causeTitle, currency, action }: Donation
       <button
         type="submit"
         disabled={effectiveAmountMinor < bounds.min || effectiveAmountMinor > bounds.max || !email || isPending}
-        className="mt-4 w-full rounded-full bg-emerald-600 py-3 text-sm font-semibold text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-400 dark:text-zinc-500 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-600 dark:text-zinc-400"
+        className="mt-4 w-full rounded-full bg-emerald-600 py-3 text-sm font-semibold text-white transition-colors hover:bg-emerald-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-400 dark:text-zinc-500 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-600 dark:text-zinc-400"
       >
         {isPending
           ? "Redirecting to payment…"

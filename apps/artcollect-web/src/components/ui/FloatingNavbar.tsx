@@ -99,7 +99,7 @@ export function FloatingNavbar() {
           onClick={() => setMenuOpen((open) => !open)}
           aria-expanded={menuOpen}
           aria-label={menuOpen ? "Close menu" : "Open menu"}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-ink text-ink sm:hidden"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-ink text-ink transition-colors hover:bg-paper-deep active:scale-90 sm:hidden"
         >
           {menuOpen ? <X size={18} aria-hidden /> : <Menu size={18} aria-hidden />}
         </button>

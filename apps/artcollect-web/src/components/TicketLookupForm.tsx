@@ -55,7 +55,7 @@ export function TicketLookupForm() {
 
         <button
           type="submit"
-          className="flex w-full items-center justify-center gap-2 rounded-full bg-zinc-900 py-3 text-sm font-semibold text-white transition-colors hover:bg-zinc-700"
+          className="flex w-full items-center justify-center gap-2 rounded-full bg-zinc-900 py-3 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 active:scale-[0.98]"
         >
           <Search size={16} />
           Find ticket

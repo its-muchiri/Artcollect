@@ -3,18 +3,32 @@
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { usePrefersReducedMotion } from "@artcollect/ui";
-import type { TactileTicketProps } from "./TactileTicket";
+import type { AdmitOneTicketProps } from "@/components/ui/admit-one-ticket";
+
+export interface TicketShowcaseProps {
+  title: string;
+  tierName: string;
+  venue?: string | null;
+  dates?: string | null;
+  /** Shown as the ticket's own "name" line — falls back to the tier when the buyer didn't give one. */
+  attendeeName?: string | null;
+  /** Special editions (VIP tiers) get a swapped accent palette. */
+  foil: boolean;
+}
 
 /**
- * Code-split + reduced-motion-aware boundary for the tactile 3D ticket
+ * Code-split + reduced-motion-aware boundary for the tactile ticket card
  * (docs/11 Phase 6). The static poster renders FIRST (same design as the
- * 3D face); the WebGL object mounts only after the showcase intersects
- * the viewport and the main thread is idle, and never at all under
- * reduced motion. All information (event, tier, QR codes below) lives in
- * plain DOM — the object is a tactile flourish, nothing functional is
- * conveyed by it alone.
+ * shader face); the WebGL object mounts only after the showcase
+ * intersects the viewport and the main thread is idle, and never at all
+ * under reduced motion. All information (event, tier, QR codes below)
+ * lives in plain DOM — the object is a tactile flourish, nothing
+ * functional is conveyed by it alone.
  */
-const TactileTicket = dynamic(() => import("./TactileTicket"), { ssr: false });
+const AdmitOneTicket = dynamic(
+  () => import("@/components/ui/admit-one-ticket").then((m) => m.AdmitOneTicket),
+  { ssr: false },
+);
 
 function whenIdle(callback: () => void): () => void {
   const scheduler = window as Window & {
@@ -29,7 +43,7 @@ function whenIdle(callback: () => void): () => void {
   return () => window.clearTimeout(timeout);
 }
 
-export function TicketShowcase(props: TactileTicketProps) {
+export function TicketShowcase(props: TicketShowcaseProps) {
   const reduced = usePrefersReducedMotion();
   const regionRef = useRef<HTMLDivElement>(null);
   const [objectOn, setObjectOn] = useState(false);
@@ -56,12 +70,42 @@ export function TicketShowcase(props: TactileTicketProps) {
     };
   }, [reduced]);
 
+  const ticketProps: AdmitOneTicketProps = {
+    name: props.attendeeName?.trim() || props.tierName,
+    presenter: "TIKOYETU PRESENTS",
+    event: props.title,
+    venue: props.venue ?? "Venue to be announced",
+    dates: props.dates ?? "Date TBA",
+    stubText: props.tierName,
+    watermark: String(new Date().getFullYear()),
+    ...(props.foil
+      ? {
+          texture: {
+            engine: "generative",
+            colorBack: "#1f4fd8", // --ac-cobalt — special-edition accent swap
+            colorFront: "#f5f1e8",
+            colorHighlight: "#a4c639",
+            shape: "sphere",
+            type: "8x8",
+            size: 1.2,
+            colorSteps: 5,
+            originalColors: true,
+            scale: 1.6,
+            rotation: 0,
+            offsetX: 0,
+            offsetY: 0,
+            speed: 0.3,
+          },
+        }
+      : {}),
+  };
+
   return (
     <div
       ref={regionRef}
       className="relative overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-900"
     >
-      {/* Static poster fallback — the 3D face's exact design, in CSS. */}
+      {/* Static poster fallback — a plain reading of the same info. */}
       <div
         aria-hidden={objectOn && !reduced ? true : undefined}
         className="relative aspect-[1024/448] w-full bg-paper"
@@ -86,8 +130,8 @@ export function TicketShowcase(props: TactileTicketProps) {
 
       {/* The tactile object, once mounted, takes over the same region. */}
       {objectOn && !reduced && (
-        <div className="absolute inset-0">
-          <TactileTicket {...props} />
+        <div className="absolute inset-0 grid place-items-center">
+          <AdmitOneTicket {...ticketProps} width={480} tilt={{ maxTilt: 7, glare: 0.14 }} />
           <p className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-white/85 dark:bg-zinc-900/85 px-3 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">
             Drag the ticket to tilt it
           </p>

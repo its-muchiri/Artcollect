@@ -48,7 +48,7 @@ export function BrowseWall({ artworks }: { artworks: ArtworkCard[] }) {
             aria-pressed={filter === kind}
             onClick={() => setFilter(kind)}
             className={cn(
-              "inline-flex items-center gap-1.5 border-2 border-ink px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition-colors duration-150",
+              "inline-flex items-center gap-1.5 border-2 border-ink px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition-[colors,transform] duration-150 hover:-translate-y-0.5 active:translate-y-0",
               filter === kind ? "bg-ink text-paper" : "bg-paper text-ink hover:bg-paper-deep",
             )}
           >

@@ -91,7 +91,7 @@ export function Coverflow({
           type="button"
           aria-label={`Scroll ${label} left`}
           onClick={() => scrollByCard(-1)}
-          className="flex h-9 w-9 items-center justify-center border-2 border-ink bg-paper font-display text-base text-ink transition-colors hover:bg-ink hover:text-paper"
+          className="flex h-9 w-9 items-center justify-center border-2 border-ink bg-paper font-display text-base text-ink transition-[colors,transform] hover:bg-ink hover:text-paper active:translate-y-0.5"
         >
           ←
         </button>
@@ -99,7 +99,7 @@ export function Coverflow({
           type="button"
           aria-label={`Scroll ${label} right`}
           onClick={() => scrollByCard(1)}
-          className="flex h-9 w-9 items-center justify-center border-2 border-ink bg-paper font-display text-base text-ink transition-colors hover:bg-ink hover:text-paper"
+          className="flex h-9 w-9 items-center justify-center border-2 border-ink bg-paper font-display text-base text-ink transition-[colors,transform] hover:bg-ink hover:text-paper active:translate-y-0.5"
         >
           →
         </button>

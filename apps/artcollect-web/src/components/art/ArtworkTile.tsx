@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import type { ArtworkAuctionBadge, ArtworkCard } from "@/lib/artworks";
+import { ArtCaptionPress } from "@/components/art/ArtCaption";
 import { cn, formatKes } from "@/lib/format";
 
 export const AVAILABILITY_LABEL: Record<ArtworkCard["availability"], string> = {
@@ -31,48 +33,68 @@ export const AUCTION_CLASS: Record<ArtworkAuctionBadge["status"], string> = {
  * paper edges, a 2px ink rule, and an offset-print hover shadow — no
  * glass, no gradients. Used by both the homepage band (RSC) and the
  * client-side browse grid.
+ *
+ * Pressing the artwork opens its caption — an African proverb or quote
+ * beside the piece (see ArtCaptionPress); the title block stays the link
+ * into the artist's studio.
  */
 export function ArtworkTile({ artwork, className }: { artwork: ArtworkCard; className?: string }) {
+  const captionTarget = {
+    slug: artwork.slug,
+    title: artwork.title,
+    artistName: artwork.artistName,
+    artistSlug: artwork.artistSlug,
+    image: artwork.image,
+    imageAlt: artwork.alt ?? null,
+    medium: artwork.medium,
+    yearCreated: artwork.yearCreated,
+  };
+
   return (
-    <Link
-      href={`/artists/${artwork.artistSlug}`}
+    <div
       className={cn(
-        "group relative block border-2 border-ink bg-paper transition-[transform,box-shadow] duration-200",
+        "group relative border-2 border-ink bg-paper transition-[transform,box-shadow] duration-200",
         "shadow-[0_0_0_var(--ac-shadow-ink)] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_var(--ac-shadow-ink)]",
         className,
       )}
     >
-      <div className="relative aspect-[4/3] overflow-hidden border-b-2 border-ink bg-paper-deep">
-        {artwork.image && (
-          // eslint-disable-next-line @next/next/no-img-element -- external, unoptimized editorial imagery
-          <img
-            src={artwork.image}
-            alt={artwork.alt ?? artwork.title}
-            loading="lazy"
-            className="h-full w-full object-cover"
-          />
-        )}
-        <span
-          className={cn(
-            "absolute left-2 top-2 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide",
-            AVAILABILITY_CLASS[artwork.availability],
+      <ArtCaptionPress target={captionTarget}>
+        <div className="relative aspect-[4/3] overflow-hidden border-b-2 border-ink bg-paper-deep">
+          {artwork.image && (
+            // eslint-disable-next-line @next/next/no-img-element -- external, unoptimized editorial imagery
+            <img
+              src={artwork.image}
+              alt={artwork.alt ?? artwork.title}
+              loading="lazy"
+              className="h-full w-full object-cover"
+            />
           )}
-        >
-          {AVAILABILITY_LABEL[artwork.availability]}
-        </span>
-        {artwork.auction && (
           <span
             className={cn(
-              "absolute right-2 top-2 border-2 border-ink px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide",
-              AUCTION_CLASS[artwork.auction.status],
+              "absolute left-2 top-2 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide",
+              AVAILABILITY_CLASS[artwork.availability],
             )}
           >
-            {AUCTION_LABEL[artwork.auction.status]}
+            {AVAILABILITY_LABEL[artwork.availability]}
           </span>
-        )}
-      </div>
+          {artwork.auction && (
+            <span
+              className={cn(
+                "absolute right-2 top-2 border-2 border-ink px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide",
+                AUCTION_CLASS[artwork.auction.status],
+              )}
+            >
+              {AUCTION_LABEL[artwork.auction.status]}
+            </span>
+          )}
+        </div>
+      </ArtCaptionPress>
 
-      <div className="space-y-1 p-4">
+      <Link
+        href={`/artists/${artwork.artistSlug}`}
+        className="group/link block space-y-1 p-4 transition-colors hover:bg-paper-deep active:bg-paper-deep"
+        aria-label={`${artwork.title} by ${artwork.artistName} — visit the studio`}
+      >
         <h3 className="text-base font-semibold leading-snug text-ink">{artwork.title}</h3>
         <p className="text-sm text-ink/60">{artwork.artistName}</p>
         <div className="flex items-baseline justify-between gap-2 pt-1">
@@ -85,7 +107,11 @@ export function ArtworkTile({ artwork, className }: { artwork: ArtworkCard; clas
             </span>
           )}
         </div>
-      </div>
-    </Link>
+        <span className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-ink/0 transition-colors duration-200 group-hover/link:text-cobalt">
+          Visit studio
+          <ArrowRight size={12} aria-hidden />
+        </span>
+      </Link>
+    </div>
   );
 }

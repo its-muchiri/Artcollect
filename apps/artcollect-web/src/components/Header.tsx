@@ -67,7 +67,7 @@ export function Header() {
             onClick={() => setMenuOpen((open) => !open)}
             aria-expanded={menuOpen}
             aria-label={menuOpen ? "Close menu" : "Open menu"}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 sm:hidden"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 transition-colors hover:bg-zinc-100 hover:text-zinc-900 active:scale-90 dark:hover:bg-zinc-800 dark:hover:text-zinc-100 sm:hidden"
           >
             {menuOpen ? <X size={18} aria-hidden /> : <Menu size={18} aria-hidden />}
           </button>

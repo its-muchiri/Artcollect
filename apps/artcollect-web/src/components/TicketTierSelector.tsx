@@ -88,7 +88,7 @@ export function TicketTierSelector({ eventId, tiers, currency }: TicketTierSelec
                   aria-label={`Decrease ${tier.name} quantity`}
                   disabled={qty <= 0}
                   onClick={() => setQuantity(tier, qty - 1)}
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-zinc-200 text-zinc-600 transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-zinc-200 text-zinc-600 transition-colors hover:bg-zinc-50 active:scale-90 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <Minus size={14} />
                 </button>
@@ -98,7 +98,7 @@ export function TicketTierSelector({ eventId, tiers, currency }: TicketTierSelec
                   aria-label={`Increase ${tier.name} quantity`}
                   disabled={soldOut || qty >= tier.maxPerOrder || qty >= tier.remaining}
                   onClick={() => setQuantity(tier, qty + 1)}
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-zinc-200 text-zinc-600 transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-zinc-200 text-zinc-600 transition-colors hover:bg-zinc-50 active:scale-90 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <Plus size={14} />
                 </button>
@@ -166,7 +166,7 @@ export function TicketTierSelector({ eventId, tiers, currency }: TicketTierSelec
         type="button"
         disabled={totalQuantity === 0 || !email || !phone || isPending}
         onClick={handleCheckout}
-        className="mt-4 w-full rounded-full bg-emerald-600 py-3 text-sm font-semibold text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-400"
+        className="mt-4 w-full rounded-full bg-emerald-600 py-3 text-sm font-semibold text-white transition-colors hover:bg-emerald-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-400"
       >
         {isPending
           ? "Sending M-Pesa prompt…"

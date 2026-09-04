@@ -6,6 +6,7 @@ import { Annotation } from "@artcollect/ui";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { TicketShowcase } from "@/components/wallet/TicketShowcase";
+import { formatEventDate } from "@/lib/format";
 
 /**
  * Where the buyer lands right after an M-Pesa STK prompt is sent.
@@ -33,7 +34,7 @@ export default async function OrderPendingPage({
 
   const order = await prisma.order.findUnique({
     where: { id: orderId },
-    include: { event: { select: { title: true } }, items: true },
+    include: { event: { select: { title: true, venue: true, startsAt: true } }, items: true },
   });
   if (!order) notFound();
 
@@ -66,6 +67,9 @@ export default async function OrderPendingPage({
                 <TicketShowcase
                   title={order.event.title}
                   tierName={firstTierName}
+                  venue={order.event.venue}
+                  dates={order.event.startsAt ? formatEventDate(order.event.startsAt.toISOString()) : null}
+                  attendeeName={order.buyerName}
                   foil={firstTierName.toUpperCase().includes("VIP")}
                 />
               </div>

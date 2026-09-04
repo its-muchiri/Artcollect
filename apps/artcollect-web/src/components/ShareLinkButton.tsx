@@ -48,7 +48,7 @@ export function ShareLinkButton({ code, title, label = "Share", className }: Sha
       aria-label={`${label} — short link /s/${code}`}
       className={
         className ??
-        "inline-flex items-center gap-2 rounded-full border-2 border-ink px-4 py-2 text-sm font-semibold text-ink transition-colors hover:bg-ink hover:text-paper"
+        "inline-flex items-center gap-2 rounded-full border-2 border-ink px-4 py-2 text-sm font-semibold text-ink transition-colors hover:bg-ink hover:text-paper active:scale-95"
       }
     >
       {copied ? <Check size={15} aria-hidden /> : <Share2 size={15} aria-hidden />}

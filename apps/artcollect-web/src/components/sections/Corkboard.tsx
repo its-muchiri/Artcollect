@@ -101,7 +101,7 @@ export function Corkboard({ pieces }: { pieces: CorkboardPiece[] }) {
                 type="button"
                 aria-label="Scroll the corkboard left"
                 onClick={() => scrollByCards(-1)}
-                className="flex h-10 w-10 items-center justify-center border-2 border-ink bg-paper font-display text-lg text-ink transition-colors hover:bg-ink hover:text-paper"
+                className="flex h-10 w-10 items-center justify-center border-2 border-ink bg-paper font-display text-lg text-ink transition-[colors,transform] hover:bg-ink hover:text-paper active:translate-y-0.5"
               >
                 ←
               </button>
@@ -109,7 +109,7 @@ export function Corkboard({ pieces }: { pieces: CorkboardPiece[] }) {
                 type="button"
                 aria-label="Scroll the corkboard right"
                 onClick={() => scrollByCards(1)}
-                className="flex h-10 w-10 items-center justify-center border-2 border-ink bg-paper font-display text-lg text-ink transition-colors hover:bg-ink hover:text-paper"
+                className="flex h-10 w-10 items-center justify-center border-2 border-ink bg-paper font-display text-lg text-ink transition-[colors,transform] hover:bg-ink hover:text-paper active:translate-y-0.5"
               >
                 →
               </button>

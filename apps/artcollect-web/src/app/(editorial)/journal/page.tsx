@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Annotation } from "@artcollect/ui";
 import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
+import { Coverflow, type CoverflowItem } from "@/components/carousel/Coverflow";
 import { listPublishedPosts } from "@/lib/posts";
-import { parsePostBody, readingMinutes } from "@/lib/post-format";
 
 export const metadata: Metadata = {
   title: "The Journal — ArtCollect",
@@ -92,36 +92,18 @@ export default async function JournalPage() {
               </RevealOnScroll>
             )}
 
-            <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {rest.map((post, i) => (
-                <RevealOnScroll key={post.id} index={i % 6}>
-                  <Link
-                    href={`/journal/${post.slug}`}
-                    className="group flex flex-col border-2 border-ink bg-paper shadow-[0_0_0_rgba(22,19,17,1)] transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_rgba(22,19,17,1)]"
-                  >
-                    <div className="aspect-[16/10] overflow-hidden border-b-2 border-ink bg-paper-deep">
-                      {post.coverImage && (
-                        // eslint-disable-next-line @next/next/no-img-element -- external, unoptimized editorial imagery
-                        <img
-                          src={post.coverImage}
-                          alt={post.title}
-                          loading="lazy"
-                          className="h-full w-full object-cover"
-                        />
-                      )}
-                    </div>
-                    <div className="flex flex-1 flex-col gap-2 p-4">
-                      <h3 className="text-lg font-semibold leading-snug text-ink">{post.title}</h3>
-                      {post.excerpt && (
-                        <p className="line-clamp-3 text-sm text-ink/60">{post.excerpt}</p>
-                      )}
-                      <p className="mt-auto pt-2 text-xs text-ink/50">
-                        {post.authorName} · {post.readingMinutes} min read
-                      </p>
-                    </div>
-                  </Link>
-                </RevealOnScroll>
-              ))}
+            <div className="mt-10">
+              <Coverflow
+                label="Journal stories"
+                items={rest.map((post): CoverflowItem => ({
+                  key: post.id,
+                  title: post.title,
+                  meta: `${post.authorName} · ${post.readingMinutes} min read`,
+                  image: post.coverImage,
+                  imageAlt: post.title,
+                  href: `/journal/${post.slug}`,
+                }))}
+              />
             </div>
           </>
         )}

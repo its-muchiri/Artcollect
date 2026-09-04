@@ -13,11 +13,53 @@ export interface GraffitiHeadlineProps {
 }
 
 /**
+ * Layout math: Anton at `fontSize` runs ≈0.52em per uppercase character.
+ * Shrink the size until the title wraps into ≤3 lines that each fit the
+ * 96-unit text box; lines that still overrun get `textLength` (glyph
+ * squeezing) so nothing ever clips out of the viewBox — long titles like
+ * "GENESIS — 404 EFFECT FRIDAY NIGHT" wrap instead of vanishing.
+ */
+function layoutTitle(title: string): { lines: string[]; fontSize: number; height: number } {
+  const words = title.split(/\s+/).filter(Boolean);
+  const candidates = [20, 16, 13, 11, 9];
+
+  for (const size of candidates) {
+    const maxChars = Math.floor(92 / (size * 0.52));
+    const lines: string[] = [];
+    let current = "";
+    for (const word of words) {
+      const candidate = current ? `${current} ${word}` : word;
+      if (candidate.length > maxChars && current) {
+        lines.push(current);
+        current = word;
+      } else {
+        current = candidate;
+      }
+      if (lines.length === 3) break;
+    }
+    if (lines.length < 3 && current) lines.push(current);
+
+    if (lines.length <= 3 && words.length > 0 && lines.length > 0) {
+      const lineHeight = size * 1.08;
+      // 4 units top padding + lines + 8 units of drip room below.
+      return { lines, fontSize: size, height: Math.ceil(4 + lines.length * lineHeight + 8) };
+    }
+  }
+
+  // Degenerate fallback (single enormous word): squeeze one line.
+  return { lines: [title], fontSize: 9, height: 24 };
+}
+
+function naturalWidth(text: string, fontSize: number): number {
+  return text.length * fontSize * 0.52;
+}
+
+/**
  * The graffiti headline (docs/11 Phase 6): the Anton poster face rendered
- * as SVG text and run through the code-driven spray filter, with two
- * drip marks and a hot-pink sticker. Loaded ONLY on graffiti-category
- * event pages (streetart/music/nightlife) via the dynamic-import wrapper
- * — other event pages never fetch this bundle.
+ * as SVG text and run through the code-driven spray filter, with drip
+ * marks and a hot-pink sticker. Loaded ONLY on graffiti-category event
+ * pages (streetart/music/nightlife) via the dynamic-import wrapper —
+ * other event pages never fetch this bundle.
  */
 export default function GraffitiHeadline({ title, sticker, className }: GraffitiHeadlineProps) {
   const rawId = useId().replace(/[^a-zA-Z0-9_-]/g, "");
@@ -25,10 +67,20 @@ export default function GraffitiHeadline({ title, sticker, className }: Graffiti
   const dripId = `spray-d-${rawId}`;
   const seed = (title.length % 17) + 3;
 
+  const { lines, fontSize, height } = layoutTitle(title.toUpperCase());
+  const lineHeight = fontSize * 1.08;
+  const firstBaseline = 4 + fontSize;
+  const lastBaseline = firstBaseline + (lines.length - 1) * lineHeight;
+  const poster = "var(--font-poster), 'Arial Narrow', Impact, sans-serif";
+
+  // Drips fall from a few anchor points under the last line.
+  const dripAnchors = lines.length > 0 ? [18, 52, 84] : [];
+  const dripFloor = lastBaseline + 1.5;
+
   return (
     <div className={className}>
       <svg
-        viewBox="0 0 100 34"
+        viewBox={`0 0 100 ${height}`}
         className="block h-auto w-full"
         role="img"
         aria-label={title}
@@ -42,35 +94,53 @@ export default function GraffitiHeadline({ title, sticker, className }: Graffiti
           </filter>
         </defs>
 
-        {/* Overspray shadow pass */}
-        <text
-          x="2"
-          y="24"
-          fontSize="20"
-          fontFamily="var(--font-poster), 'Arial Narrow', Impact, sans-serif"
-          fill="var(--ac-hot-pink)"
-          opacity="0.5"
-          filter={`url(#${filterId})`}
-          transform="translate(0.8 0.8)"
-        >
-          {title}
-        </text>
-        {/* Main spray pass */}
-        <text
-          x="2"
-          y="24"
-          fontSize="20"
-          fontFamily="var(--font-poster), 'Arial Narrow', Impact, sans-serif"
-          fill="var(--ac-ink)"
-          filter={`url(#${filterId})`}
-        >
-          {title}
-        </text>
+        {/* Overspray shadow pass + main spray pass, per line. */}
+        {lines.map((line, i) => {
+          const y = firstBaseline + i * lineHeight;
+          const overrun = naturalWidth(line, fontSize) > 92;
+          const fit = overrun ? { textLength: 92, lengthAdjust: "spacingAndGlyphs" as const } : {};
+          return (
+            <g key={i}>
+              <text
+                x="2"
+                y={y}
+                fontSize={fontSize}
+                fontFamily={poster}
+                fill="var(--ac-hot-pink)"
+                opacity="0.5"
+                filter={`url(#${filterId})`}
+                transform="translate(0.8 0.8)"
+                {...fit}
+              >
+                {line}
+              </text>
+              <text
+                x="2"
+                y={y}
+                fontSize={fontSize}
+                fontFamily={poster}
+                fill="var(--ac-ink)"
+                filter={`url(#${filterId})`}
+                {...fit}
+              >
+                {line}
+              </text>
+            </g>
+          );
+        })}
+
         {/* Drips */}
         <g filter={`url(#${dripId})`} opacity="0.85">
-          <path d={`M18 25 q0.6 3 0 5 t0 4`} stroke="var(--ac-ink)" strokeWidth="1.4" fill="none" strokeLinecap="round" />
-          <path d={`M52 25 q0.6 4 0 6.5 t0 3`} stroke="var(--ac-ink)" strokeWidth="1.2" fill="none" strokeLinecap="round" />
-          <path d={`M84 25 q0.5 2.5 0 4.5`} stroke="var(--ac-ink)" strokeWidth="1" fill="none" strokeLinecap="round" />
+          {dripAnchors.map((x, i) => (
+            <path
+              key={i}
+              d={`M${x} ${dripFloor} q0.6 ${2 + i} 0 ${3 + i * 1.5} t0 2`}
+              stroke="var(--ac-ink)"
+              strokeWidth={1.4 - i * 0.2}
+              fill="none"
+              strokeLinecap="round"
+            />
+          ))}
         </g>
       </svg>
 

@@ -12,5 +12,9 @@ export default defineConfig({
   },
   datasource: {
     url: process.env.DATABASE_URL,
+    // Needed by `prisma migrate diff --from-migrations` (replaying the
+    // migration set onto a scratch database). Defaults to the main URL —
+    // point SHADOW_DATABASE_URL at a scratch database for real diffs.
+    shadowDatabaseUrl: process.env.SHADOW_DATABASE_URL ?? process.env.DATABASE_URL,
   },
 });

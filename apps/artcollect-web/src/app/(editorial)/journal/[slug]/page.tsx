@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Annotation, StapleMark, TapePiece } from "@artcollect/ui";
-import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
+import { Coverflow, type CoverflowItem } from "@/components/carousel/Coverflow";
 import { getPostBySlug, listPublishedPosts } from "@/lib/posts";
 import { parsePostBody } from "@/lib/post-format";
 
@@ -125,23 +125,18 @@ export default async function PostPage({
         <section className="border-t-2 border-ink bg-paper-deep">
           <div className="mx-auto w-full max-w-6xl px-[var(--ac-gutter)] py-14">
             <h2 className="font-display text-2xl text-ink">MORE FROM THE JOURNAL</h2>
-            <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
-              {more.map((other, i) => (
-                <RevealOnScroll key={other.id} index={i}>
-                  <Link
-                    href={`/journal/${other.slug}`}
-                    className="group border-2 border-ink bg-paper p-4 shadow-[0_0_0_rgba(22,19,17,1)] transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_rgba(22,19,17,1)]"
-                  >
-                    <h3 className="text-lg font-semibold text-ink">{other.title}</h3>
-                    {other.excerpt && (
-                      <p className="mt-1 line-clamp-2 text-sm text-ink/60">{other.excerpt}</p>
-                    )}
-                    <p className="mt-3 text-xs text-ink/50">
-                      {other.authorName} · {other.readingMinutes} min read
-                    </p>
-                  </Link>
-                </RevealOnScroll>
-              ))}
+            <div className="mt-4">
+              <Coverflow
+                label="More journal stories"
+                items={more.map((other): CoverflowItem => ({
+                  key: other.id,
+                  title: other.title,
+                  meta: `${other.authorName} · ${other.readingMinutes} min read`,
+                  image: other.coverImage,
+                  imageAlt: other.title,
+                  href: `/journal/${other.slug}`,
+                }))}
+              />
             </div>
           </div>
         </section>

@@ -1,11 +1,16 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
-import { Ticket } from "lucide-react";
+import { Menu, Ticket, X } from "lucide-react";
 
 const NAV_LINKS = [
+  { label: "Art & artists", href: "/" },
   { label: "Events", href: "/events" },
   { label: "Donate", href: "/donate" },
   { label: "How it works", href: "/events#how-it-works" },
   { label: "For organisers", href: "/events#organisers" },
+  { label: "Find my ticket", href: "/lookup" },
 ] as const;
 
 /**
@@ -16,12 +21,22 @@ const NAV_LINKS = [
  * explicit "Art & artists" link alongside it so a ticket buyer can find
  * their way back to the browsing side without relying on the browser's
  * back button.
+ *
+ * Below `sm` the link row collapses into a hamburger sheet: hiding it
+ * outright with no fallback (the previous behaviour) left phones with no
+ * way to reach Donate, how-it-works, or ticket lookup at all.
  */
 export function Header() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <header className="sticky top-0 z-50 border-b border-zinc-200 bg-white/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-6">
-        <Link href="/" className="flex items-center gap-2 font-display text-lg font-bold text-zinc-900">
+        <Link
+          href="/"
+          onClick={() => setMenuOpen(false)}
+          className="flex items-center gap-2 font-display text-lg font-bold text-zinc-900"
+        >
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600 text-white">
             <Ticket size={18} strokeWidth={2.25} />
           </span>
@@ -29,12 +44,6 @@ export function Header() {
         </Link>
 
         <nav className="hidden items-center gap-8 sm:flex">
-          <Link
-            href="/"
-            className="text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900"
-          >
-            Art &amp; artists
-          </Link>
           {NAV_LINKS.map((link) => (
             <Link
               key={link.label}
@@ -46,21 +55,51 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-4">
-          <Link
-            href="/lookup"
-            className="hidden text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 sm:block"
-          >
-            Find my ticket
-          </Link>
+        <div className="flex items-center gap-3">
           <Link
             href="/events"
-            className="rounded-full bg-zinc-900 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-zinc-700"
+            className="hidden rounded-full bg-zinc-900 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 sm:block"
           >
             Browse events
           </Link>
+          <button
+            type="button"
+            onClick={() => setMenuOpen((open) => !open)}
+            aria-expanded={menuOpen}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200 text-zinc-700 sm:hidden"
+          >
+            {menuOpen ? <X size={18} aria-hidden /> : <Menu size={18} aria-hidden />}
+          </button>
         </div>
       </div>
+
+      {menuOpen && (
+        <nav className="border-t border-zinc-200 bg-white px-6 py-3 sm:hidden">
+          <ul className="flex flex-col">
+            {NAV_LINKS.map((link) => (
+              <li key={link.label}>
+                <Link
+                  href={link.href}
+                  onClick={() => setMenuOpen(false)}
+                  className="block rounded-lg px-2 py-3 text-base font-medium text-zinc-800 active:bg-zinc-50"
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+            <li className="pt-2">
+              <Link
+                href="/events"
+                onClick={() => setMenuOpen(false)}
+                className="block rounded-full bg-zinc-900 px-4 py-3 text-center text-sm font-semibold text-white"
+              >
+                Browse events
+              </Link>
+            </li>
+          </ul>
+        </nav>
+      )}
     </header>
   );
 }

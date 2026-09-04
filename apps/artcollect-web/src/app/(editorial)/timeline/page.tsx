@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Gavel, Ticket } from "lucide-react";
+import { FloatingNavbar } from "@/components/ui/FloatingNavbar";
 import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
 import { getTimeline, type TimelineEntry, type TimelineStatus } from "@/lib/timeline";
 import { cn } from "@/lib/format";
@@ -63,6 +64,7 @@ export default async function TimelinePage() {
 
   return (
     <main className="min-h-screen bg-paper">
+      <FloatingNavbar />
       <header className="border-b-2 border-ink">
         <div className="mx-auto w-full max-w-6xl px-[var(--ac-gutter)] pb-10 pt-24">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-cobalt">
@@ -101,7 +103,7 @@ export default async function TimelinePage() {
                           aria-hidden
                         />
                         {entry.image && (
-                          <div className="relative hidden h-20 w-20 shrink-0 overflow-hidden border-2 border-ink bg-paper-deep sm:block">
+                          <div className="relative h-16 w-16 shrink-0 overflow-hidden border-2 border-ink bg-paper-deep sm:h-20 sm:w-20">
                             {/* eslint-disable-next-line @next/next/no-img-element -- external, unoptimized editorial imagery */}
                             <img
                               src={entry.image}

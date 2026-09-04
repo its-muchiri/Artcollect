@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Calendar, MapPin } from "lucide-react";
 import { deriveCtaState } from "@artcollect/contracts";
@@ -27,6 +28,21 @@ const CTA_COPY: Record<string, string> = {
   status_unknown: "Checking availability…",
 };
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const event = await getEventBySlug(slug);
+  if (!event) return { title: "Event not found — TikoYetu" };
+  return {
+    title: `${event.title} — TikoYetu`,
+    description:
+      event.description ?? `${event.title} at ${event.venue}${event.city ? `, ${event.city}` : ""}. Tickets on TikoYetu.`,
+  };
+}
+
 export default async function EventPage({
   params,
 }: {
@@ -35,6 +51,40 @@ export default async function EventPage({
   const { slug } = await params;
   const event = await getEventBySlug(slug);
   if (!event) notFound();
+
+  // Event rich-snippet data (technical SEO): only the fields this page
+  // actually knows for certain — no invented end time or fabricated offer
+  // availability beyond what `event.availability` already says.
+  const eventStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: event.title,
+    startDate: event.startsAt ?? undefined,
+    eventStatus:
+      event.status === "cancelled"
+        ? "https://schema.org/EventCancelled"
+        : "https://schema.org/EventScheduled",
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    location: {
+      "@type": "Place",
+      name: event.venue,
+      address: event.city ?? undefined,
+    },
+    image: event.coverImage ?? undefined,
+    description: event.description ?? undefined,
+    offers:
+      event.lowestPriceMinor > 0
+        ? {
+            "@type": "Offer",
+            price: (event.lowestPriceMinor / 100).toFixed(2),
+            priceCurrency: event.currency,
+            availability:
+              event.availability === "sold_out"
+                ? "https://schema.org/SoldOut"
+                : "https://schema.org/InStock",
+          }
+        : undefined,
+  };
 
   // Demonstrates the shared `@artcollect/contracts` CTA-state logic on the
   // TikoYetu side — the same `deriveCtaState` an ArtCollect event page would
@@ -49,6 +99,10 @@ export default async function EventPage({
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(eventStructuredData) }}
+      />
       <Header />
 
       <main className="mx-auto w-full max-w-6xl px-6 py-10">

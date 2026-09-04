@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { FloatingNavbar } from "@/components/ui/FloatingNavbar";
 import { BrowseWall } from "@/components/art/BrowseWall";
 import { TornEdge } from "@artcollect/ui";
 import { listPublishedArtworks } from "@/lib/artworks";
@@ -21,6 +22,7 @@ export default async function BrowsePage() {
 
   return (
     <main className="min-h-screen bg-paper">
+      <FloatingNavbar />
       <header className="border-b-2 border-ink bg-paper">
         <div className="mx-auto w-full max-w-6xl px-[var(--ac-gutter)] pb-10 pt-24">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-cobalt">

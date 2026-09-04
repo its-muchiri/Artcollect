@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Heart } from "lucide-react";
 import { Annotation, StapleMark, TapePiece, TornEdge } from "@artcollect/ui";
+import { FloatingNavbar } from "@/components/ui/FloatingNavbar";
 import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
 import { listPublishedCauseCards } from "@/lib/causes";
 import { formatKes } from "@/lib/format";
@@ -24,6 +25,7 @@ export default async function CausesPage() {
 
   return (
     <main className="min-h-screen bg-paper">
+      <FloatingNavbar />
       <header className="border-b-2 border-ink">
         <div className="mx-auto w-full max-w-6xl px-[var(--ac-gutter)] pb-10 pt-24">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-cobalt">

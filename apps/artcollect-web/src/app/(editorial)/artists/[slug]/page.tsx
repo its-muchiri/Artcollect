@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { Annotation, HighlighterMark, StapleMark, TapePiece } from "@artcollect/ui";
 import { ArtworkTile } from "@/components/art/ArtworkTile";
 import { HorizontalGallery } from "@/components/sections/HorizontalGallery";
+import { FloatingNavbar } from "@/components/ui/FloatingNavbar";
 import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
 import { getArtistBySlug, profileQuote } from "@/lib/artists";
 import { cn } from "@/lib/utils";
@@ -63,8 +64,26 @@ export default async function ArtistPage({
     },
   ];
 
+  // Person rich-snippet data (technical SEO): only fields this profile
+  // actually has — no invented job title or fabricated social links.
+  const personStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: artist.name,
+    description: artist.tagline ?? artist.bio ?? undefined,
+    image: artist.portraitUrl,
+    address: artist.location ? { "@type": "PostalAddress", addressLocality: artist.location } : undefined,
+    url: artist.websiteUrl ?? undefined,
+    jobTitle: "Artist",
+  };
+
   return (
     <main className="min-h-screen bg-paper">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(personStructuredData) }}
+      />
+      <FloatingNavbar />
       {/* Profile header: portrait + handwritten margin system */}
       <header className="border-b-2 border-ink">
         <div className="mx-auto w-full max-w-6xl px-[var(--ac-gutter)] pb-16 pt-24">
@@ -90,8 +109,13 @@ export default async function ArtistPage({
                 <StapleMark className="absolute right-3 top-3" angle={12} />
               </div>
 
+              {/* These read as margin notes only where the layout actually
+                  has margin to spare (the two-column desktop grid) —
+                  below `lg` the portrait fills the whole column, so the
+                  same percentages would sit on top of the photo instead
+                  of beside it. */}
               {notes.map((note) => (
-                <div key={note.text} className={`absolute ${note.className}`}>
+                <div key={note.text} className={`absolute hidden lg:block ${note.className}`}>
                   <Annotation tone={note.tone}>{note.text}</Annotation>
                 </div>
               ))}

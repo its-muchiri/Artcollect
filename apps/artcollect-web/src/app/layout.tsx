@@ -39,15 +39,65 @@ const caveat = Caveat({
   display: "swap",
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://artcollect-web.vercel.app";
+const SITE_TITLE = "ArtCollect — Collect the work you can't stop thinking about";
+const SITE_DESCRIPTION =
+  "Buy original art from East African artists, donate to real art causes with public receipts, and get opening-night tickets — all on ArtCollect.";
+
 export const metadata: Metadata = {
-  title: "ArtCollect — Collect the work you can't stop thinking about",
-  description:
-    "ArtCollect is a maximalist home for East African art: collage-built exhibitions, artist portfolios, and TikoYetu ticketing, in one place.",
+  metadataBase: new URL(SITE_URL),
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
+  keywords: [
+    "buy original art online",
+    "art exhibitions Nairobi",
+    "donate to art programs",
+    "art auctions",
+    "East African artists",
+    "art events Kenya",
+    "how to value artwork",
+  ],
+  openGraph: {
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+    siteName: "ArtCollect",
+    locale: "en_KE",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
 };
 
 export interface RootLayoutProps {
   children: ReactNode;
 }
+
+// Site-wide structured data: one Organization/WebSite pair, kept to facts
+// this app can actually back up (it makes no nonprofit or tax-status
+// claims anywhere — see the Journal's donation posts for why).
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
+      name: "ArtCollect",
+      url: SITE_URL,
+      description: SITE_DESCRIPTION,
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      url: SITE_URL,
+      name: "ArtCollect",
+      publisher: { "@id": `${SITE_URL}/#organization` },
+    },
+  ],
+};
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
@@ -56,6 +106,10 @@ export default function RootLayout({ children }: RootLayoutProps) {
       className={`${anton.variable} ${inter.variable} ${caveat.variable}`}
     >
       <body className="relative min-h-screen bg-paper text-ink antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
         {children}
       </body>
     </html>

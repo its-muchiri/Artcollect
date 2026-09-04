@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, MapPin } from "lucide-react";
 import { Annotation, TapePiece } from "@artcollect/ui";
+import { FloatingNavbar } from "@/components/ui/FloatingNavbar";
 import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
 import { listPublishedArtists } from "@/lib/artists";
 
@@ -22,6 +23,7 @@ export default async function ArtistsPage() {
 
   return (
     <main className="min-h-screen bg-paper">
+      <FloatingNavbar />
       <header className="border-b-2 border-ink">
         <div className="mx-auto w-full max-w-6xl px-[var(--ac-gutter)] pb-10 pt-24">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-cobalt">

@@ -777,6 +777,172 @@ One donor giving 50,000 paints one wall. Five hundred donors giving 100 paint ei
 
 Every cause listed here publishes its receipts: paint litres, brush counts, stipend weeks. If a cause can't show you the till slip, it doesn't get a page.`,
     },
+    {
+      title: "Where your donation actually goes: inside the Kibera Walls Fund",
+      slug: "inside-the-kibera-walls-fund",
+      excerpt:
+        "A line-by-line look at what an art donation buys on ArtCollect — paint, generator fuel, and painter stipends — and why the receipts are public.",
+      cover:
+        "https://images.unsplash.com/photo-1569172122301-bc5008bc09c5?auto=format&fit=crop&w=1200&q=80",
+      author: "Otieno Odhiambo",
+      tags: ["donations", "causes", "murals", "transparency"],
+      body: `"Where does the money actually go" is the first question anyone asks before donating to an art cause, and it's a fair one — most giving pages answer it with a stock photo and a big round number. The Kibera Walls Fund answers it with a shopping list.
+
+## What a donation actually buys
+
+Every cause page on ArtCollect breaks its goal into real line items instead of one abstract target. For the Walls Fund, that's exterior paint rated to survive the rains, a generator so painters can keep working after the light goes, and stipend weeks for the fourteen young artists doing the actual painting. Twenty bob (KES 20) genuinely moves the needle when it's added to five hundred other twenty-bob gifts — that's the arithmetic the fund is built on, not a slogan.
+
+## The receipts are the point, not an afterthought
+
+This isn't a registered charity making a tax claim — it's an organiser publishing a public ledger. Paint litres bought, brush counts, stipend weeks paid: all of it posted monthly against the goal, in the open, so a KES 100 donor can see exactly what their gift became. If a cause can't show its till slip, it doesn't get a page on this platform.
+
+## How checkout actually works
+
+Donating runs through the same payment rail as event tickets: pick an amount (or set your own), pay by M-Pesa or card, and get a receipt the moment payment clears — no separate account, no waiting. You can donate anonymously or have your name (and a short message, if you want one) show up on the cause's public supporter list.
+
+> Every shilling is receipted — paint litres and stipend weeks, published.
+
+That's not a tagline here. It's the actual mechanism a wall gets painted by.`,
+    },
+    {
+      title: "Why donate to an art cause instead of just buying a piece",
+      slug: "why-donate-to-an-art-cause",
+      excerpt:
+        "Buying art supports one artist directly. Donating to an art cause funds the workshops, materials, and stipends that make the next ten artists possible. Both matter.",
+      cover:
+        "https://images.unsplash.com/photo-1531913764164-f85c52e6e654?auto=format&fit=crop&w=1200&q=80",
+      author: "Njeri Wachira",
+      tags: ["donations", "causes", "community"],
+      body: `Buying a piece and donating to a cause do different jobs, and it's worth being clear-eyed about which one you're actually doing, because a lot of well-meaning giving gets this backwards.
+
+## Buying supports one artist; donating supports the pipeline
+
+When you buy an original from ArtCollect, the money goes to the person who made it — that's the most direct support an artist can get, and it should usually come first. But most artists on this platform didn't start with a studio and a full set of materials. They started at a workshop that gave them their first screen-printing rig, or a residency stipend that covered a month of rent while they worked. Causes fund that earlier, less visible stage — the one that produces the artists whose work you'll eventually want to buy.
+
+## Small, frequent gifts outperform one big one
+
+The maths favours volume over size. A single KES 50,000 donation funds one mural. Five hundred people giving KES 100 each funds eight, plus a stipend week two painters actually get paid for. Causes on this platform are priced in matatu-fare amounts on purpose — a KES 20 or KES 100 gift is a real, complete unit of the goal, not a rounding error next to someone else's big cheque.
+
+## What you get back
+
+A public record, mostly. Your name (or "Anonymous," your call) on the cause's supporter list, a short message if you leave one, and a receipt the moment M-Pesa or your card clears. What this isn't: a tax deduction, a share of anything, or a promise about resale value. It's a wall that gets painted, or a workshop that gets equipped, because enough people decided twenty bob was worth it.
+
+## Where to start
+
+The current causes — a mural fund in Kibera, a screen-printing equipment fund for a Mombasa girls' cohort — both publish exactly what's been raised and what it bought, updated as it happens. Read the story, check the ledger, then decide if it's worth your KES 100.`,
+    },
+    {
+      title: "How much is your artwork actually worth? A practical first read",
+      slug: "how-much-is-your-artwork-worth",
+      excerpt:
+        "Before you pay for a formal appraisal, here's how art valuation actually works — provenance, condition, edition size, and the comparables that set a real price.",
+      cover:
+        "https://images.unsplash.com/photo-1518998053901-5348d3961a04?auto=format&fit=crop&w=1200&q=80",
+      author: "Otieno Odhiambo",
+      tags: ["valuation", "collecting", "education"],
+      body: `"What's it worth" is a harder question than it sounds, mostly because most people are actually asking three different questions at once: what did it cost, what could I sell it for, and what does a professional appraiser think. Here's how to start answering the second one yourself, before you pay anyone for the third.
+
+## The four things that actually move a price
+
+Provenance first — who owned it, and can that be proven. A piece with a clean paper trail back to the artist is worth more than an identical one with a shrug for a backstory. Condition second: foxing, fading, a repaired tear, all of it discounted, sometimes badly. Edition size third — a unique original and print 4 of 200 are not the same asset, even from the same hand. And market comparables last: what has this artist's other work actually sold for recently, not what a gallery wishlist says it should.
+
+## Original vs. edition changes everything
+
+A one-of-one original carries scarcity a limited edition print never will, even a small one. That's why ArtCollect marks every listing "original" or an edition size up front — it's the single biggest lever on value, and it should be the first thing you check, not the last.
+
+## What a formal appraisal actually adds
+
+A paid appraisal earns its fee for insurance, estate, or resale documentation — a written, defensible opinion of value from someone with no stake in the sale. It is not required to make a reasonable first estimate yourself, and no platform (this one included) should pretend a quick online tool replaces one when real money or an insurance claim is on the line.
+
+## Where value actually gets made, not just measured
+
+The most reliable way to see real prices is to watch what comparable work by comparable artists actually sells for — which is exactly what a browsable, price-visible market does. Every published piece on ArtCollect carries its price openly, in the open, so the next artist's work has a real comparable to be priced against — not a guess.`,
+    },
+    {
+      title: "A practical guide to starting your first art collection",
+      slug: "starting-your-first-art-collection",
+      excerpt:
+        "You don't need a gallery relationship or a five-figure budget to start collecting. A beginner's guide to buying your first piece — and your second.",
+      cover:
+        "https://images.unsplash.com/photo-1541961017774-22349e4a1262?auto=format&fit=crop&w=1200&q=80",
+      author: "Njeri Wachira",
+      tags: ["collecting", "beginners", "education"],
+      body: `Nobody starts an art collection on purpose. It's usually one piece that wouldn't leave you alone, followed six months later by the realization you now own two, and the word "collection" suddenly applies whether you planned it or not. Here's how to make that first piece a good one.
+
+## Buy the piece, not the plan
+
+Skip the checklist of "movements you should own." Buy what you'd genuinely be glad to see on your wall in five years, from an artist whose other work you'd also want to see. A collection built on real reactions to real pieces ages better than one built on a strategy.
+
+## Read the story attached to the work
+
+Every published piece here carries the story of how it was made, kept attached — not a plaque, an actual paragraph from the artist. That story is half of what you're buying. A piece with no attached story, no visible artist, and no way to ask a question is a much riskier first purchase than one where you can read the medium, the year, and the reasoning, then just message the artist if something's unclear.
+
+## Start with what's actually in your budget, honestly
+
+An original from an emerging, still-building-a-name artist costs a fraction of an established one and can be just as good a piece. Small editions and prints cost less still, and they're a completely legitimate way to start — collecting isn't a status ladder you have to enter at the top.
+
+## Keep the paperwork from day one
+
+Save the listing, the price, the date, and any message exchange with the artist. That's your provenance, and it's worth ten times more in five years than it costs you in effort today — see our piece on how artwork is actually valued for why.
+
+## The second piece is easier
+
+The first purchase is the only genuinely hard one. After that you already know what you respond to, and the collection starts building its own logic — which is really the whole point.`,
+    },
+    {
+      title: "What actually happens at an opening night, and how to get in",
+      slug: "what-happens-at-an-opening-night",
+      excerpt:
+        "Art exhibition openings aren't as intimidating as they look from outside. What to expect, what to wear, and how tickets and QR entry actually work.",
+      cover:
+        "https://images.unsplash.com/photo-1531913764164-f85c52e6e654?auto=format&fit=crop&w=1200&q=80",
+      author: "Njeri Wachira",
+      tags: ["events", "openings", "guide"],
+      body: `Opening night looks intimidating from the outside — a gallery full of people who seem to already know each other, standing near art they seem to already understand. It's less exclusive than it looks, and the mechanics of actually getting in are the easy part.
+
+## What actually happens
+
+An opening is the first public viewing of a show, usually two to three hours, usually with the artist actually in the room — which is the real reason to go. You look at the work, you can ask the artist a direct question about a piece if you want to, and mostly people just stand around talking. There's no test at the door.
+
+## Getting in is a ticket, not an invitation
+
+Openings tied to a show on ArtCollect hand off to TikoYetu for tickets — pick the event, pay by M-Pesa or card, and your ticket lands as a QR code the moment payment clears, in your inbox and in your ticket wallet on this site. At the door, someone scans the code. That's the entire process; there's no guest list to be on.
+
+## What to actually wear and do
+
+Whatever you'd wear to a nice coffee shop is over-thought enough. Arrive within the first hour if you want to actually talk to the artist before they're pulled into ten other conversations. You're allowed to just look, say nothing, and leave — nobody is grading your commentary.
+
+## If you can't make it in person
+
+Openings get folded into the site's timeline alongside every other event and art auction, so you can see what's coming and plan around it, and a piece from the show is usually still viewable and purchasable on the artist's profile page afterward even if you miss opening night itself.`,
+    },
+    {
+      title: "Buying straight from the artist: what changes with no gallery markup",
+      slug: "buying-direct-from-the-artist",
+      excerpt:
+        "Direct-from-artist purchases skip the gallery's cut, but they also skip the gallery's guardrails. What that trade actually means for buyers.",
+      cover:
+        "https://images.unsplash.com/photo-1549289524-06cf8837ace5?auto=format&fit=crop&w=1200&q=80",
+      author: "Otieno Odhiambo",
+      tags: ["buying", "artists", "market"],
+      body: `A gallery typically takes a commission somewhere around half the sale price, in exchange for curation, promotion, and a physical space to view the work. Buying directly from the artist removes that cut — but it's worth understanding exactly what else it removes before you assume it's simply a discount.
+
+## What you're not paying for
+
+No gallery rent, no curator's fee, no framed white-cube experience — all of that is reflected in the price. On a platform like ArtCollect, the price on a listing is what the artist actually set for their own work, with no markup layered on top for anyone else's overhead.
+
+## What doesn't change
+
+The story still has to hold up. Every published piece carries its medium, year, and the artist's own description, and the artist is one message away if a detail's unclear — an inquiry goes straight to them, not to a gallery intermediary who'd have to relay your question. If anything, direct buying gets you a more informed answer, faster, because it's coming from the person who actually made the decision you're asking about.
+
+## What you're trading away
+
+A gallery's reputation is partly a filter — someone already decided this work was worth showing. Buying direct means doing more of that judgment yourself: does the artist have other work that holds up, is the story specific rather than generic, does the price make sense against comparable work by comparable artists. None of that is hard, it's just now your job instead of a curator's.
+
+## Originals vs. editions, either way
+
+Whether you're buying direct or through a gallery, the original-vs-edition distinction still does the heavy lifting on price and scarcity — that part of collecting doesn't change just because the transaction got shorter. What changes is how much of the artist's actual voice you hear before you decide.`,
+    },
   ];
 
   for (const post of posts) {

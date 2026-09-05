@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { Annotation, TapePiece } from "@artcollect/ui";
 import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
@@ -19,13 +20,13 @@ export function ArtistSpotlight({ artist }: { artist: ArtistCard }) {
       <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-12 px-[var(--ac-gutter)] py-20 lg:grid-cols-[2fr_3fr]">
         {/* Portrait scrap, taped to the dark wall */}
         <RevealOnScroll className="relative mx-auto w-full max-w-xs lg:mx-0">
-          <div className="relative border-2 border-paper bg-paper-deep shadow-[6px_6px_0_rgba(245,241,232,0.9)]" style={{ rotate: "2deg" }}>
-            {/* eslint-disable-next-line @next/next/no-img-element -- external, unoptimized editorial imagery */}
-            <img
+          <div className="relative aspect-[4/5] w-full overflow-hidden border-2 border-paper bg-paper-deep shadow-[6px_6px_0_rgba(245,241,232,0.9)]" style={{ rotate: "2deg" }}>
+            <Image
               src={artist.portraitUrl}
               alt={`Portrait of ${artist.name}`}
-              loading="lazy"
-              className="block aspect-[4/5] w-full object-cover"
+              fill
+              sizes="(min-width: 1024px) 320px, 90vw"
+              className="object-cover"
             />
             <TapePiece className="-top-3 left-1/2 w-24 -translate-x-1/2" angle={3} />
           </div>

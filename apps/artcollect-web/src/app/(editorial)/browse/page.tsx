@@ -1,5 +1,6 @@
 import { ArrowRight, Heart } from "lucide-react";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { FloatingNavbar } from "@/components/ui/FloatingNavbar";
 import { PartnersMarquee } from "@/components/sections/PartnersMarquee";
 import { BrowseWall } from "@/components/art/BrowseWall";
@@ -54,14 +55,14 @@ export default async function BrowsePage() {
                 Community murals, print workshops, materials funds. Every shilling is receipted.
               </p>
             </div>
-            <a
+            <Link
               href="/donate"
               className="inline-flex shrink-0 items-center gap-2 bg-ink px-6 py-3 text-sm font-semibold text-paper transition-transform hover:scale-105 active:scale-95"
             >
               <Heart size={16} aria-hidden />
               Donate now
               <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden />
-            </a>
+            </Link>
           </div>
         </section>      <PartnersMarquee compact />
     </main>

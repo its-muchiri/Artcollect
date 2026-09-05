@@ -1,5 +1,9 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth, signOut } from "@/auth";
+
+// Internal, auth-gated — nothing here is meant for search results.
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 const STUDIO_ROLES = ["artist", "curator", "organiser", "admin"] as const;
 

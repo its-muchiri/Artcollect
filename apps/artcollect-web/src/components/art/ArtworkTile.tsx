@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import type { ArtworkAuctionBadge, ArtworkCard } from "@/lib/artworks";
 import { ArtCaptionPress } from "@/components/art/ArtCaption";
@@ -61,12 +62,12 @@ export function ArtworkTile({ artwork, className }: { artwork: ArtworkCard; clas
       <ArtCaptionPress target={captionTarget}>
         <div className="relative aspect-[4/3] overflow-hidden border-b-2 border-ink bg-paper-deep">
           {artwork.image && (
-            // eslint-disable-next-line @next/next/no-img-element -- external, unoptimized editorial imagery
-            <img
+            <Image
               src={artwork.image}
               alt={artwork.alt ?? artwork.title}
-              loading="lazy"
-              className="h-full w-full object-cover"
+              fill
+              sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+              className="object-cover"
             />
           )}
           <span

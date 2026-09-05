@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { StapleMark, TapePiece, TornEdge } from "@artcollect/ui";
 import { type CorkboardPiece } from "./corkboard-data";
@@ -40,13 +41,7 @@ function PeelCard({ piece, index }: { piece: CorkboardPiece; index: number }) {
 
         <div className="relative aspect-[4/3] overflow-hidden bg-paper-deep">
           {piece.image && (
-            // eslint-disable-next-line @next/next/no-img-element -- external, unoptimized editorial imagery
-            <img
-              src={piece.image}
-              alt={piece.alt}
-              loading="lazy"
-              className="h-full w-full object-cover"
-            />
+            <Image src={piece.image} alt={piece.alt} fill sizes="(min-width: 640px) 288px, 256px" className="object-cover" />
           )}
         </div>
 

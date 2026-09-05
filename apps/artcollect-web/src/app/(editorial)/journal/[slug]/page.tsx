@@ -41,8 +41,25 @@ export default async function PostPage({
   const blocks = parsePostBody(post.body);
   const more = (await listPublishedPosts(4)).filter((p) => p.slug !== post.slug).slice(0, 2);
 
+  // Article rich-snippet data (technical SEO): only fields this post
+  // actually has — no invented publisher logo or fabricated dateModified.
+  const articleStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title,
+    description: post.excerpt ?? undefined,
+    image: post.coverImage ?? undefined,
+    datePublished: post.publishedAt ?? undefined,
+    author: { "@type": "Person", name: post.authorName },
+    publisher: { "@type": "Organization", name: "ArtCollect" },
+  };
+
   return (
     <main className="min-h-screen bg-paper">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleStructuredData) }}
+      />
       <FloatingNavbar />
       <article className="mx-auto w-full max-w-3xl px-[var(--ac-gutter)] pb-20 pt-24">
         <Link href="/journal" className="text-sm font-semibold text-cobalt hover:text-ink">

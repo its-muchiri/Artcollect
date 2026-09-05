@@ -1,9 +1,16 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { CreditCard, QrCode, ShieldCheck, Smartphone } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { EventBrowser } from "@/components/EventBrowser";
 import { listEvents } from "@/lib/ticketing-events";
+
+export const metadata: Metadata = {
+  title: "Events & tickets — TikoYetu",
+  description:
+    "Find live events across Kenya and buy tickets in a few taps — M-Pesa or card, instant QR delivery, real availability.",
+};
 
 // Ticket availability must never be served from a stale build-time
 // snapshot (docs/08: "must not claim a ticket is available without a

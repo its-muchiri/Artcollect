@@ -2,6 +2,13 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // Local editorial/artwork images already go through next/image; this is
+  // the one external host used for placeholder/demo imagery (Wanjiku's
+  // seed photos, journal covers) so those can too instead of staying
+  // unoptimized <img> tags.
+  images: {
+    remotePatterns: [{ protocol: "https", hostname: "images.unsplash.com" }],
+  },
   // Consume the shared internal workspace packages' TS source directly —
   // they ship no build step of their own (see packages/database,
   // packages/ui, packages/contracts).

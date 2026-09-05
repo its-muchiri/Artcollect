@@ -2,79 +2,61 @@ import type { MetadataRoute } from "next";
 import { prisma } from "@artcollect/database";
 
 /**
- * Dynamic sitemap (docs/11-style technical SEO): static routes plus every
- * public dynamic surface — published journal posts, published artists,
- * on-sale ticketing events, and published donation causes. Rendered
- * per-request (force-dynamic) so freshly published content is crawlable
- * immediately.
+ * Generated sitemap (technical SEO baseline — this app had none before).
+ * Static routes are listed by hand; artist profiles and journal posts are
+ * pulled live so a newly published one is indexed on the next crawl
+ * without a code change. `getAllPublicUrls` is reused by the IndexNow
+ * submission route (app/api/reindex) so both stay in sync automatically.
  */
 
-const BASE = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") || "http://localhost:3000";
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://artcollect-web.vercel.app";
 
-export const dynamic = "force-dynamic";
+const STATIC_ROUTES = ["/", "/browse", "/artists", "/journal", "/causes", "/timeline", "/events"];
+
+export async function getAllPublicUrls(): Promise<string[]> {
+  const [artists, posts] = await Promise.all([
+    prisma.artistProfile.findMany({ where: { visibility: "published" }, select: { slug: true } }),
+    prisma.post.findMany({ where: { status: "published" }, select: { slug: true } }),
+  ]);
+
+  return [
+    ...STATIC_ROUTES.map((path) => `${BASE_URL}${path}`),
+    ...artists.map((artist) => `${BASE_URL}/artists/${artist.slug}`),
+    ...posts.map((post) => `${BASE_URL}/journal/${post.slug}`),
+  ];
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [posts, artists, events, causes] = await Promise.all([
-    prisma.post.findMany({
-      where: { status: "published" },
-      select: { slug: true, updatedAt: true },
-      orderBy: { publishedAt: "desc" },
-    }),
+  const [artists, posts] = await Promise.all([
     prisma.artistProfile.findMany({
       where: { visibility: "published" },
       select: { slug: true, updatedAt: true },
     }),
-    prisma.ticketingEvent.findMany({
-      where: { status: { in: ["on_sale", "sales_paused", "sold_out"] } },
-      select: { slug: true, updatedAt: true },
-    }),
-    prisma.donationCause.findMany({
+    prisma.post.findMany({
       where: { status: "published" },
       select: { slug: true, updatedAt: true },
     }),
   ]);
 
-  const staticRoutes: MetadataRoute.Sitemap = [
-    "",
-    "/browse",
-    "/journal",
-    "/causes",
-    "/events",
-    "/donate",
-    "/artists",
-    "/how-it-works",
-  ].map((path) => ({
-    url: `${BASE}${path}`,
-    lastModified: new Date(),
-    changeFrequency: path === "" ? "daily" : "weekly",
-    priority: path === "" ? 1 : 0.8,
+  const staticEntries: MetadataRoute.Sitemap = STATIC_ROUTES.map((path) => ({
+    url: `${BASE_URL}${path}`,
+    changeFrequency: path === "/" ? "daily" : "weekly",
+    priority: path === "/" ? 1 : 0.7,
   }));
 
-  return [
-    ...staticRoutes,
-    ...posts.map((post) => ({
-      url: `${BASE}/journal/${post.slug}`,
-      lastModified: post.updatedAt,
-      changeFrequency: "monthly" as const,
-      priority: 0.7,
-    })),
-    ...artists.map((artist) => ({
-      url: `${BASE}/artists/${artist.slug}`,
-      lastModified: artist.updatedAt,
-      changeFrequency: "weekly" as const,
-      priority: 0.7,
-    })),
-    ...events.map((event) => ({
-      url: `${BASE}/events/${event.slug}`,
-      lastModified: event.updatedAt,
-      changeFrequency: "daily" as const,
-      priority: 0.9,
-    })),
-    ...causes.map((cause) => ({
-      url: `${BASE}/donate/${cause.slug}`,
-      lastModified: cause.updatedAt,
-      changeFrequency: "daily" as const,
-      priority: 0.9,
-    })),
-  ];
+  const artistEntries: MetadataRoute.Sitemap = artists.map((artist) => ({
+    url: `${BASE_URL}/artists/${artist.slug}`,
+    lastModified: artist.updatedAt,
+    changeFrequency: "weekly",
+    priority: 0.6,
+  }));
+
+  const postEntries: MetadataRoute.Sitemap = posts.map((post) => ({
+    url: `${BASE_URL}/journal/${post.slug}`,
+    lastModified: post.updatedAt,
+    changeFrequency: "monthly",
+    priority: 0.5,
+  }));
+
+  return [...staticEntries, ...artistEntries, ...postEntries];
 }

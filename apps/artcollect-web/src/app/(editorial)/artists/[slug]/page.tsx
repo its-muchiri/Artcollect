@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Annotation, HighlighterMark, StapleMark, TapePiece } from "@artcollect/ui";
@@ -101,12 +102,14 @@ export default async function ArtistPage({
           <div className="mt-8 grid grid-cols-1 items-start gap-12 lg:grid-cols-[2fr_3fr]">
             {/* Portrait with tape + staple + margin notes */}
             <div className="relative mx-auto w-full max-w-sm lg:mx-0">
-              <div className="relative border-2 border-ink bg-paper-deep shadow-[6px_6px_0_var(--ac-shadow-ink)]" style={{ rotate: "-1.5deg" }}>
-                {/* eslint-disable-next-line @next/next/no-img-element -- external, unoptimized editorial imagery */}
-                <img
+              <div className="relative aspect-[4/5] w-full overflow-hidden border-2 border-ink bg-paper-deep shadow-[6px_6px_0_var(--ac-shadow-ink)]" style={{ rotate: "-1.5deg" }}>
+                <Image
                   src={artist.portraitUrl}
                   alt={`Portrait of ${artist.name}`}
-                  className="block aspect-[4/5] w-full object-cover"
+                  fill
+                  sizes="(min-width: 1024px) 384px, 90vw"
+                  priority
+                  className="object-cover"
                 />
                 <TapePiece className="-top-3 left-1/2 w-24 -translate-x-1/2" angle={-4} />
                 <StapleMark className="absolute right-3 top-3" angle={12} />

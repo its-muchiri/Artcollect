@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, MapPin } from "lucide-react";
+import { ArrowRight, MapPin, Heart } from "lucide-react";
 import { Annotation, TapePiece } from "@artcollect/ui";
 import { FloatingNavbar } from "@/components/ui/FloatingNavbar";
 import { PartnersMarquee } from "@/components/sections/PartnersMarquee";
@@ -97,7 +97,26 @@ export default async function ArtistsPage() {
           </div>
         )}
       </section>
-      <PartnersMarquee compact />
+
+        {/* Donate call-to-action - hands off to TikoYetu payment */}
+        <section className="relative z-10 border-y-2 border-ink bg-coral py-12">
+          <div className="mx-auto flex w-full max-w-6xl flex-col items-start justify-between gap-6 px-[var(--ac-gutter)] sm:flex-row sm:items-center">
+            <div>
+              <h2 className="font-display text-2xl text-ink sm:text-3xl">Back a cause today</h2>
+              <p className="mt-1 max-w-xl text-sm text-ink/70">
+                Community murals, print workshops, materials funds. Every shilling is receipted.
+              </p>
+            </div>
+            <a
+              href="/donate"
+              className="inline-flex shrink-0 items-center gap-2 bg-ink px-6 py-3 text-sm font-semibold text-paper transition-transform hover:scale-105 active:scale-95"
+            >
+              <Heart size={16} aria-hidden />
+              Donate now
+              <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden />
+            </a>
+          </div>
+        </section>      <PartnersMarquee compact />
     </main>
   );
 }

@@ -11,12 +11,14 @@ import { ArtistSpotlight } from "@/components/sections/ArtistSpotlight";
 import { HowItWorks } from "@/components/sections/HowItWorks";
 import { EventsBand } from "@/components/sections/EventsBand";
 import { PartnersMarquee } from "@/components/sections/PartnersMarquee";
+import { ImpactStatsBand } from "@/components/sections/ImpactStatsBand";
 import { TornEdge } from "@artcollect/ui";
 import { listFeaturedArtworks } from "@/lib/artworks";
 import { listPublishedArtists } from "@/lib/artists";
 import { listPublishedPosts } from "@/lib/posts";
 import { listPublishedCauseCards } from "@/lib/causes";
 import { listPublishedEvents } from "@/lib/events";
+import { getImpactStats } from "@/lib/impact-stats";
 import { listEvents } from "@/lib/ticketing-events";
 import {
   AVAILABILITY_LABEL,
@@ -50,6 +52,8 @@ export default async function Home() {
     listPublishedPosts(6),
     listPublishedCauseCards(),
   ]);
+
+  const impact = await getImpactStats();
 
   const showcaseItems = interleaveShowcaseSeeds({
     art: featured.map((a): ShowcaseSeed => ({
@@ -99,6 +103,8 @@ export default async function Home() {
         <JournalBand posts={posts} />
 
         <CausesBand causes={causes} />
+
+        <ImpactStatsBand stats={impact} />
 
         <HowItWorks />
 

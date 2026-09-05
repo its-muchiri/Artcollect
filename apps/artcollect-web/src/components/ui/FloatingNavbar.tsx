@@ -13,6 +13,7 @@ const NAV_LINKS = [
   { label: "Journal", href: "/journal" },
   { label: "Tickets", href: "/events" },
   { label: "Timeline", href: "/timeline" },
+  { label: "Donate", href: "/donate" },
 ] as const;
 
 const CONDENSE_THRESHOLD = 80;

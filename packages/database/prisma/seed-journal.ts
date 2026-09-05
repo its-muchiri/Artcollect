@@ -18,7 +18,11 @@ import { PrismaClient } from "../generated/client/client";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) throw new Error("DATABASE_URL is not set.");
-const prisma = new PrismaClient({ adapter: new PrismaPg(connectionString) });
+
+/** Fresh client per batch — works around the Neon pooler dropping long-held connections. */
+function newClient(): PrismaClient {
+  return new PrismaClient({ adapter: new PrismaPg(connectionString) });
+}
 
 type Cluster =
   | "donations"
@@ -1037,7 +1041,7 @@ function clusterSections(spec: ArticleSpec, index: number): string {
 // Runner
 // ---------------------------------------------------------------------------
 const START = new Date();
-const PUBLISHED_COUNT = 10;
+const PUBLISHED_COUNT = 100;
 
 /** One-time expansion mode: re-composes every body with the long-form composer. */
 const REWRITE_BODY = process.env.JOURNAL_REWRITE_BODY === "1";
@@ -1058,59 +1062,64 @@ async function main(): Promise<void> {
   let published = 0;
   let drafted = 0;
 
-  for (let i = 0; i < SPECS.length; i += 1) {
-    const spec = SPECS[i];
-    const slug = slugify(spec.title, spec.city);
-    const author = AUTHORS[i % AUTHORS.length];
-    const cover = COVERS[i % COVERS.length];
+  // Neon's pooler drops idle/long-held connections, so we reconnect every
+  // batch to keep the seed alive across the full spec list (~394 articles).
+  const BATCH = 25;
+  for (let start = 0; start < SPECS.length; start += BATCH) {
+    const prisma = newClient();
+    const batchSpecs = SPECS.slice(start, start + BATCH);
+    for (let bi = 0; bi < batchSpecs.length; bi += 1) {
+      const i = start + bi;
+      const spec = batchSpecs[bi];
+      const slug = slugify(spec.title, spec.city);
+      const author = AUTHORS[i % AUTHORS.length];
+      const cover = COVERS[i % COVERS.length];
 
-    // Stagger: first ten are published across the past week (content
-    // calendar month one). Drafts are scheduled in daily buckets of
-    // DAILY_RATE posts — the user's pace dial (100/day by default).
-    const date = new Date(START);
-    if (i < PUBLISHED_COUNT) {
-      date.setDate(date.getDate() - (PUBLISHED_COUNT - i));
-    } else {
-      date.setDate(date.getDate() + Math.floor((i - PUBLISHED_COUNT) / DAILY_RATE));
+      // Stagger: first PUBLISHED_COUNT are published across the past
+      // PUBLISHED_COUNT days; drafts land in daily buckets of DAILY_RATE
+      // posts — the user's pace dial (100/day by default).
+      const date = new Date(START);
+      if (i < PUBLISHED_COUNT) {
+        date.setDate(date.getDate() - (PUBLISHED_COUNT - i));
+      } else {
+        date.setDate(date.getDate() + Math.floor((i - PUBLISHED_COUNT) / DAILY_RATE));
+      }
+      const status = i < PUBLISHED_COUNT ? "published" : "draft";
+      if (status === "published") published += 1;
+      else drafted += 1;
+
+      let body = clusterSections(spec, i);
+      if (REWRITE_BODY && PRESERVE_LEAD.has(slug)) {
+        const existing = await prisma.post.findUnique({ where: { slug }, select: { body: true } });
+        if (existing?.body) body = `${existing.body}\n\n---\n\n${body}`;
+      }
+      const tags = [
+        spec.cluster,
+        spec.city ?? "east-africa",
+        ...spec.focus
+          .split("-")
+          .filter((w) => w.length > 4)
+          .slice(0, 2),
+      ].slice(0, 4);
+
+      await prisma.post.upsert({
+        where: { slug },
+        update: REWRITE_BODY ? { body } : {},
+        create: {
+          slug,
+          title: spec.title,
+          excerpt: excerptFor(spec),
+          body,
+          coverImageKey: cover,
+          authorName: author,
+          tags,
+          status,
+          publishedAt: date,
+        },
+      });
     }
-    const status = i < PUBLISHED_COUNT ? "published" : "draft";
-    if (status === "published") published += 1;
-    else drafted += 1;
-
-    let body = clusterSections(spec, i);
-    // The three hand-written originals keep their editorial lead; the new
-    // long-form composer extends them past the word threshold instead of
-    // replacing their voice.
-    if (REWRITE_BODY && PRESERVE_LEAD.has(slug)) {
-      const existing = await prisma.post.findUnique({ where: { slug }, select: { body: true } });
-      if (existing?.body) body = `${existing.body}\n\n---\n\n${body}`;
-    }
-    const tags = [
-      spec.cluster,
-      spec.city ?? "east-africa",
-      ...spec.focus
-        .split("-")
-        .filter((w) => w.length > 4)
-        .slice(0, 2),
-    ].slice(0, 4);
-
-    await prisma.post.upsert({
-      where: { slug },
-      // REWRITE_BODY=1 re-composes every body once (this expansion run).
-      // Default keeps manual editorial edits intact across re-seeds.
-      update: REWRITE_BODY ? { body } : {},
-      create: {
-        slug,
-        title: spec.title,
-        excerpt: excerptFor(spec),
-        body,
-        coverImageKey: cover,
-        authorName: author,
-        tags,
-        status,
-        publishedAt: status === "published" ? date : date, // drafts carry their scheduled date
-      },
-    });
+    // Refresh the pooled connection between batches.
+    await prisma.$disconnect();
   }
 
   console.log(
@@ -1124,5 +1133,5 @@ main()
     process.exitCode = 1;
   })
   .finally(async () => {
-    await prisma.$disconnect();
+    // Client is per-batch now; nothing module-level to close.
   });
